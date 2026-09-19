@@ -13,7 +13,7 @@
  */
 
 import { generateScrambleString } from '../../cube/engine/scramble.js';
-import { saveSolve } from '../../services/solveStorage.js';
+import { saveSolve, updateSolve } from '../../services/solveStorage.js';
 
 export const TIMER_STATUS = Object.freeze({
   IDLE: 'IDLE',
@@ -34,7 +34,7 @@ export class TimerController {
    */
   constructor(options = {}) {
     this._now = options.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
-    this._storage = options.storage || null;
+    this._storage = options.storage !== undefined ? options.storage : (typeof window !== 'undefined' ? window.localStorage : null);
 
     this.inspectionEnabled = options.inspectionEnabled !== undefined ? options.inspectionEnabled : true;
     this.status = TIMER_STATUS.IDLE;
@@ -250,6 +250,11 @@ export class TimerController {
 
     if (penalty === '+2' || penalty === 'DNF' || penalty === null) {
       this.penalty = penalty;
+
+      if (this.status === TIMER_STATUS.SAVED && this.solveId) {
+        updateSolve(this.solveId, { penalty: this.penalty }, this._storage);
+      }
+
       this._notifyListeners();
     }
   }
@@ -261,6 +266,11 @@ export class TimerController {
   setMoveCount(count) {
     if (typeof count === 'number' && count >= 0) {
       this.moveCount = count;
+
+      if (this.status === TIMER_STATUS.SAVED && this.solveId) {
+        updateSolve(this.solveId, { moveCount: this.moveCount }, this._storage);
+      }
+
       this._notifyListeners();
     }
   }
@@ -271,6 +281,11 @@ export class TimerController {
    */
   setSolution(solution) {
     this.solution = solution;
+
+    if (this.status === TIMER_STATUS.SAVED && this.solveId) {
+      updateSolve(this.solveId, { solution: this.solution }, this._storage);
+    }
+
     this._notifyListeners();
   }
 
@@ -279,10 +294,10 @@ export class TimerController {
    * @returns {object|null} The saved solve record
    */
   save() {
-    if (this.status !== TIMER_STATUS.STOPPED) return null;
+    if (this.status !== TIMER_STATUS.STOPPED && this.status !== TIMER_STATUS.SAVED) return null;
 
     const record = {
-      id: this.solveId || `solve_${Date.now()}`,
+      id: this.solveId || `solve_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
       timeMs: this.timeMs,
       penalty: this.penalty,
       scramble: this.scramble,
@@ -300,9 +315,14 @@ export class TimerController {
 
   /**
    * Resets the timer back to IDLE with a fresh scramble.
+   * If a completed solve has not been saved yet, saves it automatically to prevent data loss.
    * @param {boolean} [generateNewScramble=true]
    */
   reset(generateNewScramble = true) {
+    if (this.status === TIMER_STATUS.STOPPED) {
+      this.save();
+    }
+
     this._stopDisplayLoop();
 
     this.status = TIMER_STATUS.IDLE;

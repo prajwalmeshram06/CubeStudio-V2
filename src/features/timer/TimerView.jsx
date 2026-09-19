@@ -29,6 +29,9 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
   useEffect(() => {
     const unsubscribe = controller.subscribe((state) => {
       setTimerState({ ...state });
+      if (state.status === TIMER_STATUS.SAVED) {
+        setSolves(getSolves());
+      }
     });
 
     return () => {

@@ -38,16 +38,32 @@ export function normalizeSolveRecord(item) {
 }
 
 /**
+ * Resolves the storage object, falling back to window.localStorage if storage is null or undefined.
+ * @param {Storage|null|undefined} storage
+ * @returns {Storage|null}
+ */
+function getStorage(storage) {
+  if (storage !== undefined && storage !== null) {
+    return storage;
+  }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage;
+  }
+  return null;
+}
+
+/**
  * Retrieves all stored solve records from localStorage.
  * Malformed or corrupted entries are filtered out safely.
- * @param {Storage} [storage=localStorage]
+ * @param {Storage} [storage]
  * @returns {Array<object>}
  */
-export function getSolves(storage = (typeof window !== 'undefined' ? window.localStorage : null)) {
-  if (!storage) return [];
+export function getSolves(storage) {
+  const store = getStorage(storage);
+  if (!store) return [];
 
   try {
-    const raw = storage.getItem(STORAGE_KEY);
+    const raw = store.getItem(STORAGE_KEY);
     if (!raw) return [];
 
     const parsed = JSON.parse(raw);
@@ -65,21 +81,22 @@ export function getSolves(storage = (typeof window !== 'undefined' ? window.loca
 /**
  * Saves a new solve record to persistent storage.
  * @param {object} solve
- * @param {Storage} [storage=localStorage]
+ * @param {Storage} [storage]
  * @returns {Array<object>} Updated solves list
  */
-export function saveSolve(solve, storage = (typeof window !== 'undefined' ? window.localStorage : null)) {
+export function saveSolve(solve, storage) {
   if (!isValidSolveRecord(solve)) {
     throw new Error('Cannot save invalid solve record: missing id, timeMs, or scramble');
   }
 
+  const store = getStorage(storage);
   const normalized = normalizeSolveRecord(solve);
-  const current = getSolves(storage);
+  const current = getSolves(store);
   const updated = [...current, normalized];
 
-  if (storage) {
+  if (store) {
     try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      store.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       console.error('[SolveStorage] Failed to save solve to storage:', err);
     }
@@ -92,11 +109,12 @@ export function saveSolve(solve, storage = (typeof window !== 'undefined' ? wind
  * Updates an existing solve record (e.g. toggling penalty or editing move count).
  * @param {string} id
  * @param {Partial<object>} updates
- * @param {Storage} [storage=localStorage]
+ * @param {Storage} [storage]
  * @returns {Array<object>}
  */
-export function updateSolve(id, updates, storage = (typeof window !== 'undefined' ? window.localStorage : null)) {
-  const current = getSolves(storage);
+export function updateSolve(id, updates, storage) {
+  const store = getStorage(storage);
+  const current = getSolves(store);
   const updated = current.map(s => {
     if (s.id === id) {
       return normalizeSolveRecord({ ...s, ...updates });
@@ -104,9 +122,9 @@ export function updateSolve(id, updates, storage = (typeof window !== 'undefined
     return s;
   });
 
-  if (storage) {
+  if (store) {
     try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      store.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       console.error('[SolveStorage] Failed to update solve:', err);
     }
@@ -118,16 +136,17 @@ export function updateSolve(id, updates, storage = (typeof window !== 'undefined
 /**
  * Deletes a solve record by ID.
  * @param {string} id
- * @param {Storage} [storage=localStorage]
+ * @param {Storage} [storage]
  * @returns {Array<object>} Updated solves list
  */
-export function deleteSolve(id, storage = (typeof window !== 'undefined' ? window.localStorage : null)) {
-  const current = getSolves(storage);
+export function deleteSolve(id, storage) {
+  const store = getStorage(storage);
+  const current = getSolves(store);
   const updated = current.filter(s => s.id !== id);
 
-  if (storage) {
+  if (store) {
     try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      store.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       console.error('[SolveStorage] Failed to delete solve:', err);
     }
@@ -138,12 +157,13 @@ export function deleteSolve(id, storage = (typeof window !== 'undefined' ? windo
 
 /**
  * Clears all solve records from storage.
- * @param {Storage} [storage=localStorage]
+ * @param {Storage} [storage]
  */
-export function clearSolves(storage = (typeof window !== 'undefined' ? window.localStorage : null)) {
-  if (storage) {
+export function clearSolves(storage) {
+  const store = getStorage(storage);
+  if (store) {
     try {
-      storage.removeItem(STORAGE_KEY);
+      store.removeItem(STORAGE_KEY);
     } catch (err) {
       console.error('[SolveStorage] Failed to clear storage:', err);
     }

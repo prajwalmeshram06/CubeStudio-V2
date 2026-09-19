@@ -293,4 +293,100 @@ describe('TimerController', () => {
       expect(timer.scramble).toBe("F2 D2 L2 B2");
     });
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // 7. Regression — Solve Persistence Bug Fix (Phase 5)
+  // Verifies that the old JS default-parameter bug ("null passed →
+  // null used, not the default") is gone. Solved solves MUST be
+  // written to the injected storage adapter.
+  // ─────────────────────────────────────────────────────────────
+  describe('Regression — Solve Persistence (Phase 5 Bug Fix)', () => {
+    function makeMockStorage() {
+      const store = {};
+      return {
+        getItem: vi.fn((key) => store[key] ?? null),
+        setItem: vi.fn((key, val) => { store[key] = val; }),
+        removeItem: vi.fn((key) => { delete store[key]; }),
+        store,
+      };
+    }
+
+    it('persists a completed solve to injected mock storage', () => {
+      const mockStorage = makeMockStorage();
+      const timer = new TimerController({ now: mockNow, storage: mockStorage });
+
+      timer.startSolve();
+      simulatedTime = 1000 + 9000;
+      timer.stopSolve();
+      const record = timer.save();
+
+      expect(record).not.toBeNull();
+      expect(record.timeMs).toBe(9000);
+      expect(mockStorage.setItem).toHaveBeenCalled();
+
+      const [[, storedJson]] = mockStorage.setItem.mock.calls;
+      const solves = JSON.parse(storedJson);
+      expect(Array.isArray(solves)).toBe(true);
+      expect(solves.length).toBe(1);
+      expect(solves[0].timeMs).toBe(9000);
+    });
+
+    it('does not throw when storage is null (no-op persist path)', () => {
+      const timer = new TimerController({ now: mockNow, storage: null });
+      timer.startSolve();
+      simulatedTime = 1000 + 5000;
+      timer.stopSolve();
+      const record = timer.save();
+      expect(record).not.toBeNull();
+      expect(record.timeMs).toBe(5000);
+      expect(timer.status).toBe(TIMER_STATUS.SAVED);
+    });
+
+    it('reset() auto-saves a STOPPED solve to prevent data loss', () => {
+      const mockStorage = makeMockStorage();
+      const timer = new TimerController({ now: mockNow, storage: mockStorage });
+
+      timer.startSolve();
+      simulatedTime = 1000 + 7500;
+      timer.stopSolve();
+      expect(timer.status).toBe(TIMER_STATUS.STOPPED);
+
+      timer.reset(true);
+      expect(timer.status).toBe(TIMER_STATUS.IDLE);
+      expect(mockStorage.setItem).toHaveBeenCalled();
+    });
+
+    it('setPenalty persists penalty update when status is SAVED', () => {
+      const mockStorage = makeMockStorage();
+      const timer = new TimerController({ now: mockNow, storage: mockStorage });
+
+      timer.startSolve();
+      simulatedTime = 1000 + 8000;
+      timer.stopSolve();
+      timer.save();
+      mockStorage.setItem.mockClear();
+
+      timer.setPenalty('+2');
+      expect(timer.penalty).toBe('+2');
+      expect(mockStorage.setItem).toHaveBeenCalled();
+    });
+
+    it('multiple solves accumulate correctly in storage', () => {
+      const mockStorage = makeMockStorage();
+
+      for (let i = 0; i < 3; i++) {
+        simulatedTime = 1000;
+        const timer = new TimerController({ now: mockNow, storage: mockStorage });
+        timer.startSolve();
+        simulatedTime = 1000 + (i + 1) * 3000;
+        timer.stopSolve();
+        timer.save();
+      }
+
+      const calls = mockStorage.setItem.mock.calls;
+      const lastJson = calls[calls.length - 1][1];
+      const solves = JSON.parse(lastJson);
+      expect(solves.length).toBe(3);
+    });
+  });
 });
