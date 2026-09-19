@@ -79,3 +79,22 @@
   - Relying solely on continuous mesh rotations to represent cube state: Rejected because rounding drift corrupts visual orientation.
 - **Consequences**:
   Zero visual drift, robust rapid inputs, seamless undo/redo, and clean separation between rendering and mathematics.
+
+---
+
+## ADR-0006: Manual Editor Direct Domain Operation
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  The 2D Net Manual Editor allows user manipulation of individual facelets. Without strict domain boundaries, an editor might duplicate cube state, maintain divergent validation rules, or define custom serialization formats.
+- **Decision**:
+  `EditorController` directly operates on an instance of `CubeState` using standard domain methods (`getSticker`, `setSticker`, `getFace`).
+  1. No duplicate cube representation is created.
+  2. Multi-tier validation delegates entirely to `validate(this.cubeState)`.
+  3. Serialization/deserialization uses standard Kociemba 54-facelet strings.
+  4. Valid states are passed directly to the 3D Simulator without conversion layers.
+  5. Center stickers remain fixed to preserve canonical spatial orientation.
+- **Alternatives Considered**:
+  - Storing stickers in custom React state: Rejected to eliminate state synchronization bugs.
+- **Consequences**:
+  100% interoperability between Editor, Simulator, Validation Engine, and upcoming Solver.

@@ -1,0 +1,281 @@
+/* CubeStudio V2 - Manual Cube Editor Styles */
+
+.editor-container {
+  width: 100%;
+  min-height: 100vh;
+  background: #0b0f19;
+  color: #f8fafc;
+  padding: 24px 20px 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+}
+
+.editor-header {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.editor-title-group h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.editor-title-group p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Validation Banner */
+.validation-banner {
+  max-width: 900px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.validation-banner.valid {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+}
+
+.validation-banner.invalid {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.validation-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.validation-code {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Color Palette */
+.palette-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.palette-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.palette-buttons {
+  display: flex;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.palette-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.palette-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.palette-btn.selected {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  transform: translateY(-2px);
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.color-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.color-count.exact {
+  color: #4ade80;
+}
+
+.color-count.error {
+  color: #f87171;
+}
+
+/* 2D Cube Net Layout */
+.cube-net-container {
+  display: grid;
+  grid-template-columns: repeat(4, 130px);
+  grid-template-rows: repeat(3, 130px);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.face-grid-wrapper {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.face-label {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  z-index: 2;
+}
+
+.face-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.sticker-cell {
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticker-cell:hover:not(.center) {
+  transform: scale(1.08);
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.sticker-cell.center {
+  cursor: default;
+  position: relative;
+}
+
+.center-dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+}
+
+/* Sticker Color Classes */
+.bg-U { background-color: #FFFFFF; }
+.bg-R { background-color: #DC2626; }
+.bg-F { background-color: #16A34A; }
+.bg-D { background-color: #FACC15; }
+.bg-L { background-color: #EA580C; }
+.bg-B { background-color: #2563EB; }
+
+/* Grid Placement */
+.pos-U { grid-column: 2; grid-row: 1; }
+.pos-L { grid-column: 1; grid-row: 2; }
+.pos-F { grid-column: 2; grid-row: 2; }
+.pos-R { grid-column: 3; grid-row: 2; }
+.pos-B { grid-column: 4; grid-row: 2; }
+.pos-D { grid-column: 2; grid-row: 3; }
+
+/* Action Toolbar */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  border: 1px solid #60a5fa;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+/* Import/Export Modal or Box */
+.io-section {
+  max-width: 600px;
+  width: 100%;
+  margin-top: 24px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.io-section textarea {
+  width: 100%;
+  height: 60px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  resize: vertical;
+  margin-bottom: 8px;
+}

@@ -42,7 +42,7 @@
 - **Implementation**:
   - Installed `three`, `react`, `react-dom`, `@vitejs/plugin-react`, and `lucide-react`.
   - `src/cube/rendering/colors.js`: Palette constants for standard Western face colors and internal plastic.
-  - `src/cube/rendering/CubieMeshFactory.js`: Constructs 26 individual cubie meshes with 6-face material mapping to the 54 facelet layout.
+  - `src/cube/rendering/CubieMeshFactory.js`: Constructs 26 individual cubie meshes with 6-material mapping to the 54 facelet layout.
   - `src/cube/rendering/CubeRenderer.js`: Manages 3D cubies group, face queries, position resetting, resource disposal, and `syncWithState(cubeState)` for zero drift.
   - `src/cube/rendering/MoveAnimator.js`: Animated 3D slice rotations with temporary pivot groups and cubic ease-out.
   - `src/cube/rendering/AnimationQueue.js`: FIFO queue for handling rapid keystrokes and algorithms sequentially.
@@ -56,4 +56,22 @@
   - Test run: 11/11 test files passed, 76/76 tests passed.
   - Production build: `npm run build` completed with 0 errors.
 - **Checkpoint**:
-  - Phase 1 complete and ready for clean Git checkpoint.
+  - Commit `b70b183`: `feat: implement phase 1 three.js renderer and simulator`.
+
+### 2026-09-19 — Phase 2: Manual Cube Editor + Validation Completion
+- **Author**: Lead Architect
+- **Context**: Implementing the 2D Manual Net Cube Editor and validation UI.
+- **Architectural Clarifications & Decisions**:
+  - Recorded ADR-0006 (Manual Editor Direct Domain Operation).
+  - Built direct integration into `CubeState` without intermediate or duplicate cube state representations.
+- **Implementation**:
+  - `src/features/editor/EditorController.js`: Feature controller operating directly on `CubeState`, tracking color counts, sticker updates, cycle edits, reset, clear, history, and live validation.
+  - `src/features/editor/EditorView.jsx`: React 2D Net editor component with 4x3 cross unfolded net, color palette with live remaining/total counts, live validation banner with error code display, undo/redo, clear, reset, import/export string support, and "Load into Simulator" action.
+  - `src/features/editor/editor.css`: Net grid layout and styling.
+  - `src/app/App.jsx` & `src/app/app.css`: Root navigation bar allowing seamless switching and state passing between 3D Simulator and Manual Editor.
+- **Verification & Testing**:
+  - Implemented `tests/features/EditorController.test.js` (13 tests).
+  - Test run: 12/12 test files passed, 89/89 tests passed.
+  - Production build: `npm run build` completed with 0 errors.
+- **Checkpoint**:
+  - Phase 2 complete and ready for clean Git checkpoint.

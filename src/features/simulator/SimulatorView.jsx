@@ -7,10 +7,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CubeScene } from '../../cube/rendering/CubeScene.js';
 import { CubeRenderer } from '../../cube/rendering/CubeRenderer.js';
 import { SimulatorController } from './SimulatorController.js';
-import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass } from 'lucide-react';
+import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass, Edit3 } from 'lucide-react';
 import './simulator.css';
 
-export function SimulatorView() {
+export function SimulatorView({ initialCubeState, onOpenEditor }) {
   const containerRef = useRef(null);
   const controllerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -40,6 +40,12 @@ export function SimulatorView() {
       renderer,
       animationSpeed: 200
     });
+
+    if (initialCubeState) {
+      controller.cubeState = initialCubeState.clone();
+      controller.history.clear(controller.cubeState);
+      renderer.syncWithState(controller.cubeState);
+    }
 
     sceneRef.current = scene;
     controllerRef.current = controller;
@@ -247,6 +253,17 @@ export function SimulatorView() {
             <Compass size={16} />
             <span>View</span>
           </button>
+
+          {onOpenEditor && (
+            <button
+              className="btn"
+              onClick={() => onOpenEditor(controllerRef.current?.cubeState.clone())}
+              title="Open current state in 2D Manual Editor"
+            >
+              <Edit3 size={16} />
+              <span>Editor</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

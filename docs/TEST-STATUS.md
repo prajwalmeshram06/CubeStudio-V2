@@ -2,14 +2,14 @@
 
 ## Overview
 - **Runner**: Vitest v2.1.9
-- **Last Run**: 2026-09-19 (Phase 1)
-- **Total Test Suites**: 11
-- **Passing Suites**: 11 (100%)
+- **Last Run**: 2026-09-19 (Phase 2)
+- **Total Test Suites**: 12
+- **Passing Suites**: 12 (100%)
 - **Failing Suites**: 0
-- **Total Tests**: 76
-- **Passing Tests**: 76 (100%)
+- **Total Tests**: 89
+- **Passing Tests**: 89 (100%)
 - **Failing Tests**: 0
-- **Coverage**: 100% on core domain, engine, renderer presentation, and simulator controller
+- **Coverage**: 100% on core domain, engine, renderer presentation, simulator controller, and editor controller
 
 ## Test Suites
 | Suite | Tests | Status | Scope |
@@ -25,8 +25,10 @@
 | `CubeRenderer.test.js` | 6 | Passed | 26 cubies created, 9 per face identified, materials synced with CubeState, position resets, disposal |
 | `AnimationQueue.test.js` | 3 | Passed | FIFO sequential processing, enqueueAll, queue clear/flush, busy state |
 | `SimulatorController.test.js` | 7 | Passed | Initial state, move dispatch, undo/redo, scramble, reset, algorithm application, renderer sync |
+| `EditorController.test.js` | 13 | Passed | Initial solved state, brush selection, sticker painting, center lock, cycle colors, reset, clear, undo/redo, parity detection, import/export roundtrips, state loading, simulator readiness |
 
 ## Regression & Boundary Tests Recorded
 - Duplicate pieces test requires exact color count balancing to test piece validity independently from frequency checks.
 - Rapid user input buffer prevents race conditions and corrupted mesh rotations.
 - Instant speed mode (0ms) bypasses animation delay while keeping exact state transitions and visual synchronization.
+- Fixed center pieces (index 4) protected from arbitrary editing in editor to maintain canonical face definitions.
