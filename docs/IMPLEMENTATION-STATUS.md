@@ -1,15 +1,15 @@
 # Implementation Status — CubeStudio V2
 
 ## Current Status
-- **Current Phase**: Phase 2 — Manual Cube Editor + Validation (COMPLETED)
-- **Current Task**: Phase 2 Checkpoint Clean Gate Reached
+- **Current Phase**: Phase 3 — Backend + Solver (COMPLETED)
+- **Current Task**: Phase 3 Checkpoint Clean Gate Reached
 - **Blockers**: None
 
 ## Phase Checklist
 - [x] Phase 0: Project Foundation + Cube Engine (Completed)
 - [x] Phase 1: Three.js Renderer + Simulator (Completed)
 - [x] Phase 2: Manual Cube Editor + Validation (Completed)
-- [ ] Phase 3: Backend + Solver
+- [x] Phase 3: Backend + Solver (Completed)
 - [ ] Phase 4: Solution Player + Hint System
 - [ ] Phase 5: UI/UX Redesign
 - [ ] Phase 6: Testing + Reliability
@@ -25,17 +25,18 @@
 - [ ] Phase 16: Sharing / Social
 - [ ] Phase 17: Additional Puzzle Types
 
-## Phase 2 Feature Matrix
+## Phase 3 Feature Matrix
 | Feature | Specified Requirement | Status | Notes |
 |---|---|---|---|
-| 2D Cube Net | 4x3 cross unfolded net layout | Completed | Unfolded grid with faces U (top), L, F, R, B (middle), D (bottom) |
-| 54 Editable Stickers | Interactive sticker grid | Completed | Fixed canonical centers, hover effects, direct paint on click |
-| Color Palette | 6 standard Western colors | Completed | White, Red, Green, Yellow, Orange, Blue with active live counts (/9) |
-| Live Validation | Multi-tier validator feedback | Completed | Instant live banner: valid badge or error codes (`INVALID_COUNTS`, `CORNER_TWIST_PARITY`, etc.) |
-| Reset & Clear | Solved reset and empty net clear | Completed | Reset restores solved cube; clear resets non-centers to blank |
-| Undo & Redo | History for sticker edits | Completed | Multi-step undo/redo for editor changes |
-| Import / Export | Kociemba 54-char string & JSON | Completed | Clipboard copy, string input parsing with error reporting |
-| Simulator Integration | "Load into Simulator" transfer | Completed | Passes validated `CubeState` directly to 3D Simulator |
-| Zero Duplicate State | Single authoritative CubeState | Completed | Reuses `CubeState`, `validate()`, and `constants` without duplicate logic |
-| Test Suite | 100% passing editor tests | Completed | 12 test suites, 89 passing tests |
-| Production Build | Optimized Vite production bundle | Completed | Built cleanly with 0 errors |
+| Flask Backend API | Versioned REST API under `/api/v1/` | Completed | `backend/app.py` with controlled CORS, error handlers, and zero stack trace leak |
+| Health Endpoint | `GET /api/v1/health` | Completed | Returns service status, version, and service identifier |
+| Validation Endpoint | `POST /api/v1/validate` | Completed | Multi-tier input verification + Kociemba physical solvability check |
+| Solve Endpoint | `POST /api/v1/solve` | Completed | Invokes Kociemba, parses structured move tokens, returns move count and raw string |
+| Error Schema | `{ "error": { "code": "...", "message": "..." } }` | Completed | Uses standard codes: `INVALID_REQUEST`, `INVALID_CUBE`, `UNSOLVABLE_CUBE`, `SOLVER_ERROR`, `INTERNAL_ERROR` |
+| Frontend Solver Service | `src/services/solverApi.js` abstraction | Completed | Handles network errors, parse failures, status codes; typed `SolverApiError` |
+| Solver Controller | `src/features/solver/SolverController.js` | Completed | Pre-validates using CubeEngine, serializes `CubeState`, invokes API, parses moves with `parseAlgorithm()` |
+| Solver View UI | `src/features/solver/SolverView.jsx` | Completed | Kociemba string display, validation banner, backend health badge, solve button, solution move chips, and simulator playback |
+| Cross-Module Navigation | Simulator, Editor, and Solver integration | Completed | App tab navigation, shared `CubeState` passing, and direct "Solve" buttons from Simulator and Editor |
+| Backend Test Suite | Pytest suite covering all endpoints & edge cases | Completed | 22/22 pytest tests passing in `backend/tests/test_api.py` |
+| Frontend Test Suite | Vitest unit tests for service and controller | Completed | 14 test suites, 104/104 passing frontend tests |
+| Production Build | Vite bundle build | Completed | Clean production build in 1.1s |

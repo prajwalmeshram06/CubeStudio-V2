@@ -98,3 +98,22 @@
   - Storing stickers in custom React state: Rejected to eliminate state synchronization bugs.
 - **Consequences**:
   100% interoperability between Editor, Simulator, Validation Engine, and upcoming Solver.
+
+---
+
+## ADR-0007: Python/Flask Kociemba Backend & Frontend Solver Service Layer
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  Phase 3 introduces the Rubik's Cube solver powered by the two-phase Kociemba algorithm. The solver requires a dedicated backend service with controlled API schemas, CORS, safe error handling, and separation of concerns.
+- **Decision**:
+  1. Built a versioned Python + Flask REST API (`/api/v1/`) exposing `GET /api/v1/health`, `POST /api/v1/validate`, and `POST /api/v1/solve`.
+  2. Input validation strictly enforces 54-facelet URFDLB strings, valid face symbols, 9-count frequencies, fixed center coordinates, and physical solvability via Kociemba before computation.
+  3. Structured error responses follow `{ "error": { "code": "...", "message": "..." } }` with standard error codes (`INVALID_REQUEST`, `INVALID_CUBE`, `UNSOLVABLE_CUBE`, `SOLVER_ERROR`, `INTERNAL_ERROR`), never leaking stack traces.
+  4. Frontend interaction with the backend is strictly isolated behind `src/services/solverApi.js`. React UI components and feature controllers are prohibited from invoking `fetch()` directly.
+  5. `SolverController.js` acts as the bridge: performs local pre-validation using `CubeEngine`, serializes `CubeState`, invokes `solverApi.solve()`, and converts raw solution strings into standard `Move` instances using `parseAlgorithm()`.
+- **Alternatives Considered**:
+  - Direct HTTP calls within React components: Rejected to maintain clean layered architecture and testability.
+  - In-browser JavaScript Kociemba port: Rejected in favor of the canonical Python/C Kociemba backend specified in project specifications.
+- **Consequences**:
+  Clean client-server contract, full testability with mocked HTTP calls, zero state duplication, and seamless navigation between Simulator, Editor, and Solver.

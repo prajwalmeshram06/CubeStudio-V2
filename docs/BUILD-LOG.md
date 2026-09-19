@@ -74,4 +74,28 @@
   - Test run: 12/12 test files passed, 89/89 tests passed.
   - Production build: `npm run build` completed with 0 errors.
 - **Checkpoint**:
-  - Phase 2 complete and ready for clean Git checkpoint.
+  - Commit `6fdae7b`: `feat: implement phase 2 manual cube editor and validation`.
+
+### 2026-09-19 — Phase 3: Backend + Solver Completion
+- **Author**: Lead Architect
+- **Context**: Implementing the Python Flask REST API backend with Kociemba solver and connecting the frontend solver feature.
+- **Architectural Clarifications & Decisions**:
+  - Recorded ADR-0007 (Python/Flask Kociemba Backend & Frontend Solver Service Layer).
+  - Maintained single source of truth (`CubeState`); solver operates on serialized 54-facelet strings without duplicating cube logic.
+  - Isolated network calls behind `src/services/solverApi.js`.
+- **Implementation**:
+  - `backend/app.py`: Flask application with CORS support, safe error handlers, and `/api/v1/` endpoints (`health`, `validate`, `solve`).
+  - `backend/requirements.txt`: Specified `flask`, `flask-cors`, `kociemba`, `gunicorn`.
+  - `backend/.env.example`: Environment configuration template for backend port and allowed CORS origins.
+  - `backend/tests/test_api.py`: Pytest suite testing health, valid solve, solved cube, invalid symbols/lengths/counts/centers, and non-leaking error responses.
+  - `src/services/solverApi.js`: Frontend HTTP abstraction service wrapping `fetch`, returning typed `SolverApiError`.
+  - `src/features/solver/SolverController.js`: Feature controller bridging `CubeState`, local validation via `validation.js`, and solver API. Converts solution strings into domain `Move` instances.
+  - `src/features/solver/SolverView.jsx` & `src/features/solver/solver.css`: React UI with Kociemba string display, validation status, backend connectivity indicator, solution move chips, and "Play in Simulator" action.
+  - `src/app/App.jsx`: Updated top navigation to include the Solver tab; seamless state passing and playback integration.
+  - `src/features/simulator/SimulatorView.jsx` & `src/features/editor/EditorView.jsx`: Added direct "Solve" shortcuts connecting current cube state directly into the solver.
+- **Verification & Testing**:
+  - Backend tests: 22/22 pytest tests passed in `backend/tests/test_api.py`.
+  - Frontend tests: 14/14 test suites, 104/104 Vitest tests passed.
+  - Production build: `npm run build` completed cleanly in 1.10s.
+- **Checkpoint**:
+  - Phase 3 complete and verified. Ready for commit.

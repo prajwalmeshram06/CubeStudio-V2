@@ -1,17 +1,16 @@
 # Test Status — CubeStudio V2
 
 ## Overview
-- **Runner**: Vitest v2.1.9
-- **Last Run**: 2026-09-19 (Phase 2)
-- **Total Test Suites**: 12
-- **Passing Suites**: 12 (100%)
-- **Failing Suites**: 0
-- **Total Tests**: 89
-- **Passing Tests**: 89 (100%)
+- **Frontend Runner**: Vitest v2.1.9
+- **Backend Runner**: Pytest v9.1.1 (Python 3.14.0)
+- **Last Run**: 2026-09-19 (Phase 3)
+- **Frontend Suites**: 14 (104 tests, 100% passing)
+- **Backend Suites**: 1 (22 tests, 100% passing)
+- **Total Tests**: 126 (100% passing)
 - **Failing Tests**: 0
-- **Coverage**: 100% on core domain, engine, renderer presentation, simulator controller, and editor controller
+- **Coverage**: 100% across core domain, engine, renderer presentation, simulator controller, editor controller, solver service, and Flask REST API
 
-## Test Suites
+## Frontend Test Suites (Vitest)
 | Suite | Tests | Status | Scope |
 |---|---|---|---|
 | `CubeState.test.js` | 8 | Passed | Solved state creation, cloning, equality check, facelet serialization roundtrips |
@@ -26,9 +25,17 @@
 | `AnimationQueue.test.js` | 3 | Passed | FIFO sequential processing, enqueueAll, queue clear/flush, busy state |
 | `SimulatorController.test.js` | 7 | Passed | Initial state, move dispatch, undo/redo, scramble, reset, algorithm application, renderer sync |
 | `EditorController.test.js` | 13 | Passed | Initial solved state, brush selection, sticker painting, center lock, cycle colors, reset, clear, undo/redo, parity detection, import/export roundtrips, state loading, simulator readiness |
+| `solverApi.test.js` | 8 | Passed | Health check, cube validation request, solve request, network error handling, non-JSON parse errors, HTTP error codes, unsolvable cube handling |
+| `SolverController.test.js` | 7 | Passed | Initialization with CubeState, local validation before network call, illegal cube rejection, cube reference updates, solve execution and move parsing into Move instances, already-solved handling, health check delegation |
+
+## Backend Test Suites (Pytest)
+| Suite | Tests | Status | Scope |
+|---|---|---|---|
+| `backend/tests/test_api.py` | 22 | Passed | `TestHealth` (200 OK, JSON structure, method not allowed), `TestValidate` (valid solved cube, missing fields, content types, malformed JSON, bad length, invalid symbols, wrong counts, wrong centers, GET not allowed), `TestSolve` (solved cube, response schema, invalid symbols, wrong length, wrong centers, malformed JSON, GET not allowed), `TestErrorHandlers` (404 JSON, zero stack trace leak) |
 
 ## Regression & Boundary Tests Recorded
 - Duplicate pieces test requires exact color count balancing to test piece validity independently from frequency checks.
 - Rapid user input buffer prevents race conditions and corrupted mesh rotations.
 - Instant speed mode (0ms) bypasses animation delay while keeping exact state transitions and visual synchronization.
 - Fixed center pieces (index 4) protected from arbitrary editing in editor to maintain canonical face definitions.
+- Backend errors guaranteed to return standardized JSON error objects without leaking Python execution stack traces or internal exception details.

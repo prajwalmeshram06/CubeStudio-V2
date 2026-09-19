@@ -1,0 +1,164 @@
+/* ──────────────────────────────────────────────────────────
+   SolverView — styles (matches the glassmorphic theme)
+   ────────────────────────────────────────────────────────── */
+
+.solver-view {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: #e0e0e0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Header */
+.solver-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.solver-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.solver-health {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.solver-health--ok    { color: #6ef76e; }
+.solver-health--error { color: #ff6b6b; }
+.solver-health--unknown { color: #aaaaaa; }
+
+/* Cube string */
+.solver-cube-string {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.solver-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+}
+
+.solver-code {
+  font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  word-break: break-all;
+  color: #d4d4d4;
+  user-select: all;
+}
+
+/* Validation banner */
+.solver-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.solver-banner--valid   { background: rgba(94, 204, 94, 0.15); color: #7ef87e; border: 1px solid rgba(94, 204, 94, 0.3); }
+.solver-banner--invalid { background: rgba(255, 100, 100, 0.12); color: #ff7f7f; border: 1px solid rgba(255, 100, 100, 0.3); }
+.solver-banner--error   { background: rgba(255, 160, 50, 0.12); color: #ffc070; border: 1px solid rgba(255, 160, 50, 0.3); }
+
+/* Solve button */
+.solver-btn {
+  align-self: flex-start;
+  padding: 0.65rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6a9fff, #9b6aff);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.solver-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.solver-btn:active:not(:disabled) { transform: translateY(0); }
+.solver-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Result panel */
+.solver-result {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.solver-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.solver-result-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #cce0ff;
+}
+
+.solver-apply-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(160, 220, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(100, 180, 255, 0.15);
+  color: #a0d4ff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.solver-apply-btn:hover { background: rgba(100, 180, 255, 0.28); }
+
+/* Move chips */
+.solver-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.solver-move-chip {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #e4e4ff;
+  font-weight: 600;
+}
+
+/* Raw notation */
+.solver-raw {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}

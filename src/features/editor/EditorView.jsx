@@ -9,7 +9,7 @@ import { FACES, FACE_COLORS, CENTER_STICKER_INDEX } from '../../cube/model/const
 import { CheckCircle2, AlertTriangle, RotateCcw, RotateCw, RefreshCw, Trash2, ArrowRight, Download, Upload } from 'lucide-react';
 import './editor.css';
 
-export function EditorView({ initialCubeState, onLoadIntoSimulator }) {
+export function EditorView({ initialCubeState, onLoadIntoSimulator, onOpenSolver }) {
   const controllerRef = useRef(null);
   const [editorState, setEditorState] = useState(null);
   const [ioText, setIoText] = useState('');
@@ -85,17 +85,29 @@ export function EditorView({ initialCubeState, onLoadIntoSimulator }) {
           <p>Click stickers to paint with active color or load state into simulator.</p>
         </div>
 
-        {onLoadIntoSimulator && (
-          <button
-            className="btn btn-primary"
-            disabled={!validation.valid}
-            onClick={handleSendToSimulator}
-            title={validation.valid ? 'Open this cube in the 3D Simulator' : 'Fix validation errors first'}
-          >
-            <span>Load into Simulator</span>
-            <ArrowRight size={16} />
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {onOpenSolver && (
+            <button
+              className="btn btn-secondary"
+              disabled={!validation.valid}
+              onClick={() => onOpenSolver(controllerRef.current?.cubeState.clone())}
+              title={validation.valid ? 'Open current state in Kociemba Solver' : 'Fix validation errors first'}
+            >
+              <span>Solve Cube</span>
+            </button>
+          )}
+          {onLoadIntoSimulator && (
+            <button
+              className="btn btn-primary"
+              disabled={!validation.valid}
+              onClick={handleSendToSimulator}
+              title={validation.valid ? 'Open this cube in the 3D Simulator' : 'Fix validation errors first'}
+            >
+              <span>Load into Simulator</span>
+              <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Live Validation Banner */}

@@ -7,10 +7,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CubeScene } from '../../cube/rendering/CubeScene.js';
 import { CubeRenderer } from '../../cube/rendering/CubeRenderer.js';
 import { SimulatorController } from './SimulatorController.js';
-import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass, Edit3 } from 'lucide-react';
+import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass, Edit3, Wand2 } from 'lucide-react';
 import './simulator.css';
 
-export function SimulatorView({ initialCubeState, onOpenEditor }) {
+export function SimulatorView({ initialCubeState, initialAlgorithm, onOpenEditor, onOpenSolver }) {
   const containerRef = useRef(null);
   const controllerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -45,6 +45,13 @@ export function SimulatorView({ initialCubeState, onOpenEditor }) {
       controller.cubeState = initialCubeState.clone();
       controller.history.clear(controller.cubeState);
       renderer.syncWithState(controller.cubeState);
+    }
+
+    if (initialAlgorithm && initialAlgorithm.length > 0) {
+      const alg = Array.isArray(initialAlgorithm) ? initialAlgorithm.join(' ') : initialAlgorithm;
+      setTimeout(() => {
+        controller.applyAlgorithm(alg);
+      }, 50);
     }
 
     sceneRef.current = scene;
@@ -262,6 +269,17 @@ export function SimulatorView({ initialCubeState, onOpenEditor }) {
             >
               <Edit3 size={16} />
               <span>Editor</span>
+            </button>
+          )}
+
+          {onOpenSolver && (
+            <button
+              className="btn"
+              onClick={() => onOpenSolver(controllerRef.current?.cubeState.clone())}
+              title="Open current state in Kociemba Solver"
+            >
+              <Wand2 size={16} />
+              <span>Solve</span>
             </button>
           )}
         </div>
