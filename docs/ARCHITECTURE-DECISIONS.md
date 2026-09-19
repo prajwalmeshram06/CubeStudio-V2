@@ -62,3 +62,20 @@
   - Express backend: Rejected as redundant to the specified Flask backend.
 - **Consequences**:
   Clear architectural boundaries across the entire system.
+
+---
+
+## ADR-0005: 3D Renderer Presentation Layer & Hard Synchronization
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  Animating 3D face turns with Three.js involves rotating meshes around arbitrary axes. Floating-point errors and interrupted animations can cause visual cubies to drift away from the mathematical state over time.
+- **Decision**:
+  1. `CubeRenderer` is purely a visual projection of `CubeState`. It maintains 26 cubie meshes with face materials indexed to the 54 facelet layout.
+  2. The `MoveAnimator` handles visual rotational transitions using temporary Three.js pivot groups.
+  3. At the completion of every move (or upon cancellation/undo/reset), `CubeRenderer.syncWithState(cubeState)` and `resetPositions()` are invoked to hard-lock mesh transforms and material assignments to the authoritative `CubeState`.
+  4. Input rapid clicks and multi-move sequences are queued through `AnimationQueue` (FIFO) to prevent overlapping conflicting mesh transformations.
+- **Alternatives Considered**:
+  - Relying solely on continuous mesh rotations to represent cube state: Rejected because rounding drift corrupts visual orientation.
+- **Consequences**:
+  Zero visual drift, robust rapid inputs, seamless undo/redo, and clean separation between rendering and mathematics.

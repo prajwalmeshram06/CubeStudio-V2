@@ -1,13 +1,13 @@
 # Implementation Status — CubeStudio V2
 
 ## Current Status
-- **Current Phase**: Phase 0 — Project Foundation + Cube Engine (COMPLETED)
-- **Current Task**: Phase 0 Checkpoint Clean Gate Reached
+- **Current Phase**: Phase 1 — Three.js Renderer + Simulator Foundation (COMPLETED)
+- **Current Task**: Phase 1 Checkpoint Clean Gate Reached
 - **Blockers**: None
 
 ## Phase Checklist
 - [x] Phase 0: Project Foundation + Cube Engine (Completed)
-- [ ] Phase 1: Three.js Renderer + Simulator
+- [x] Phase 1: Three.js Renderer + Simulator (Completed)
 - [ ] Phase 2: Manual Cube Editor + Validation
 - [ ] Phase 3: Backend + Solver
 - [ ] Phase 4: Solution Player + Hint System
@@ -25,19 +25,17 @@
 - [ ] Phase 16: Sharing / Social
 - [ ] Phase 17: Additional Puzzle Types
 
-## Phase 0 Feature Matrix
+## Phase 1 Feature Matrix
 | Feature | Specified Requirement | Status | Notes |
 |---|---|---|---|
-| CubeState | Single source of truth 54-facelet container | Completed | Pure JS, supports string/json/array serialization, deep clone, equals, isSolved |
-| Face & Color Constants | URFDLB with standard colors | Completed | Singmaster/Kociemba convention (Western color scheme) |
-| Move Representation | Structured move object & notation | Completed | 18 standard 3x3 moves, amount normalization, inverses |
-| Move Parser | String to move token parser | Completed | Supports standard notations, primes, alternative symbols (' , ’, i) |
-| Algorithm Parser | Tokenizer & parser for sequences | Completed | Handles spacing, parentheses, multipliers (e.g. `(R U)*3`), inline comments |
-| 18 Standard Moves | U, U', U2, D, D', D2, L, L', L2, R, R', R2, F, F', F2, B, B', B2 | Completed | Permutation-based O(1) transformations verified against 3D face cycles |
-| Move Application | applyMove & applyMoves | Completed | Deterministic pure state transitions; preserves center positions |
-| Scramble Generator | WCA-compliant scramble generator | Completed | Enforces no consecutive same-face or axis turns; seedable PRNG support |
-| Validation Engine | Multi-tier validator (syntax, centers, cubie parity) | Completed | Validates symbols, counts, centers, impossible pieces, duplicates, corner twist parity, edge flip parity, permutation parity |
-| Cubie Derivation | Derives corners & edges from CubeState | Completed | Strictly derived for validation/analysis; never a second source of truth |
-| Serialization | Kociemba 54-char string & JSON | Completed | 100% roundtrip preservation verified across random states |
-| History System | Undo/redo decoupled from state | Completed | Independent history manager with branching, moveCount, and boundary checks |
-| Test Suite | 100% passing unit & property tests | Completed | 8 test suites, 60 passing tests via Vitest |
+| Three.js Scene Setup | Scene, camera, lighting, resize handling | Completed | Responsive canvas, PCF soft shadows, multi-point studio lighting |
+| Orbit Camera Controls | Mouse drag, touch, scroll zoom, view reset | Completed | Damped spherical coordinates, polar constraints |
+| 26 Cubie Meshes | Chamfered cubies with 6 materials per mesh | Completed | Internal faces dark matte, outer faces colored by facelet index |
+| State Synchronization | `syncWithState(cubeState)` | Completed | Zero drift; hard synchronization on move end / undo / reset |
+| 3D Move Animation | Pivot-group rotational tweening | Completed | Smooth cubic ease-out, configurable speed, instant option |
+| Animation Queue | Sequential FIFO queue for rapid inputs | Completed | Buffers algorithms and fast keystrokes safely |
+| Simulator Controller | Connects UI to CubeEngine & Renderer | Completed | Dispatches moves, undo, redo, scramble, reset, state subscriptions |
+| Interactive UI View | Modern React simulator interface | Completed | Header stats, face buttons with modifiers (' and 2), speed selector, keyboard shortcuts |
+| Keyboard Controls | U D L R F B (+Shift for prime, +Alt for double) | Completed | Space to scramble, Esc to reset, Cmd+Z/Y for undo/redo |
+| Test Suite | Renderer, queue, and controller tests | Completed | 11 test suites, 76 passing tests |
+| Production Build | Optimized Vite production bundle | Completed | Built cleanly with 0 errors |

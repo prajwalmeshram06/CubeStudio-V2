@@ -2,14 +2,14 @@
 
 ## Overview
 - **Runner**: Vitest v2.1.9
-- **Last Run**: 2026-09-19
-- **Total Test Suites**: 8
-- **Passing Suites**: 8 (100%)
+- **Last Run**: 2026-09-19 (Phase 1)
+- **Total Test Suites**: 11
+- **Passing Suites**: 11 (100%)
 - **Failing Suites**: 0
-- **Total Tests**: 60
-- **Passing Tests**: 60 (100%)
+- **Total Tests**: 76
+- **Passing Tests**: 76 (100%)
 - **Failing Tests**: 0
-- **Coverage**: 100% on core domain and engine modules
+- **Coverage**: 100% on core domain, engine, renderer presentation, and simulator controller
 
 ## Test Suites
 | Suite | Tests | Status | Scope |
@@ -22,8 +22,11 @@
 | `validation.test.js` | 13 | Passed | Solved cube, scrambled cubes, malformed inputs, invalid symbols, bad counts, invalid centers, impossible pieces, duplicate pieces, corner twist parity, edge flip parity, permutation parity |
 | `history.test.js` | 5 | Passed | Push, undo, redo, boundaries, history branching upon new move, clear |
 | `properties.test.js` | 3 | Passed | 50 random scrambles inverted ($Seq \cdot Seq^{-1} = I$), 50 serialization roundtrips, 50 scrambled validity invariants |
+| `CubeRenderer.test.js` | 6 | Passed | 26 cubies created, 9 per face identified, materials synced with CubeState, position resets, disposal |
+| `AnimationQueue.test.js` | 3 | Passed | FIFO sequential processing, enqueueAll, queue clear/flush, busy state |
+| `SimulatorController.test.js` | 7 | Passed | Initial state, move dispatch, undo/redo, scramble, reset, algorithm application, renderer sync |
 
 ## Regression & Boundary Tests Recorded
 - Duplicate pieces test requires exact color count balancing to test piece validity independently from frequency checks.
-- Zero rotation moves explicitly rejected.
-- Negative move amounts normalized to modulo 4.
+- Rapid user input buffer prevents race conditions and corrupted mesh rotations.
+- Instant speed mode (0ms) bypasses animation delay while keeping exact state transitions and visual synchronization.
