@@ -1,0 +1,33 @@
+# Node & Build
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment & Logs
+.env
+.env.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS & Editor
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Python (future backend)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
