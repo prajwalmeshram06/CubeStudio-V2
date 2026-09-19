@@ -7,7 +7,9 @@
  * Uses VITE_API_BASE_URL environment variable (default: http://localhost:5000).
  */
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000').replace(/\/$/, '');
+export function getApiBase() {
+  return (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000').replace(/\/$/, '');
+}
 
 /**
  * Internal helper — performs a JSON POST request to the backend.
@@ -19,7 +21,7 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000').
 async function post(path, body) {
   let response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetch(`${getApiBase()}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -52,7 +54,7 @@ async function post(path, body) {
 async function get(path) {
   let response;
   try {
-    response = await fetch(`${API_BASE}${path}`);
+    response = await fetch(`${getApiBase()}${path}`);
   } catch (err) {
     throw new SolverApiError('NETWORK_ERROR', `Network error: ${err.message}`, null);
   }

@@ -91,9 +91,12 @@ export class SimulatorController {
    */
   applyMove(moveInput, options = {}) {
     const move = typeof moveInput === 'string' ? parseMove(moveInput) : moveInput;
-    this.queue.enqueue({
-      move,
-      instant: options.instant || this.animationSpeed === 0
+    return new Promise((resolve) => {
+      this.queue.enqueue({
+        move,
+        instant: options.instant || this.animationSpeed === 0,
+        resolve
+      });
     });
   }
 
@@ -139,6 +142,10 @@ export class SimulatorController {
 
     // 6. Notify UI
     this._notifyListeners();
+
+    if (typeof item.resolve === 'function') {
+      item.resolve(this.cubeState);
+    }
   }
 
   /**

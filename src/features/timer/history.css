@@ -1,0 +1,310 @@
+/* CubeStudio V2 - Solve History & Statistics Styles */
+
+.history-container {
+  width: 100%;
+  height: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.history-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.history-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.history-count-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #1e293b;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-history {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-history:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.btn-history.danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.btn-history.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+}
+
+/* ── Detailed Statistics Grid ─────────────────────────────────── */
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #151b2b;
+  border: 1px solid #28334e;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.stat-card-value {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.stat-card-value.highlight {
+  color: #3b82f6;
+}
+
+.stat-card-value.best {
+  color: #10b981;
+}
+
+.stat-card-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.35rem;
+}
+
+.stat-card-sub.improved {
+  color: #10b981;
+}
+
+/* ── Solves Table ─────────────────────────────────────────────── */
+.history-table-wrapper {
+  background: #151b2b;
+  border: 1px solid #28334e;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.history-table th {
+  background: #1a2236;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+  border-bottom: 1px solid #28334e;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1e293b;
+  color: #cbd5e1;
+}
+
+.history-table tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.history-table .col-time {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.col-time.dnf {
+  color: #ef4444;
+}
+
+.col-time.plus-two {
+  color: #f59e0b;
+}
+
+.history-table .col-scramble {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-table .col-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.history-action-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 0.35rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.history-action-btn:hover {
+  color: #f8fafc;
+  background: #334155;
+}
+
+.history-action-btn.delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.history-empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+/* ── Solve Detail Modal ───────────────────────────────────────── */
+.history-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.history-modal-card {
+  background: #151b2b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 540px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.modal-time-large {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  color: #3b82f6;
+  margin: 0.5rem 0;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.modal-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.modal-code-box {
+  background: #0b0f19;
+  border: 1px solid #28334e;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

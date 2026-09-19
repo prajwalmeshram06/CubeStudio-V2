@@ -98,4 +98,29 @@
   - Frontend tests: 14/14 test suites, 104/104 Vitest tests passed.
   - Production build: `npm run build` completed cleanly in 1.10s.
 - **Checkpoint**:
-  - Phase 3 complete and verified. Ready for commit.
+  - Commit `d0a7bf2`: `feat: implement phase 3 backend solver and api`.
+
+### 2026-09-19 — Phase 4: Solution Player + Hint System Completion
+- **Author**: Lead Architect
+- **Context**: Implementing the interactive Solution Player, natural-language Hint System, and real-time synchronization with the 3D Simulator.
+- **Architectural Clarifications & Decisions**:
+  - Recorded ADR-0008 (Solution Player State Machine & Headless Simulator Coordination).
+  - Maintained single authoritative `CubeState` and single animation mechanism (`AnimationQueue` in `SimulatorController`).
+  - Implemented reverse playback using `Move.inverse()` to avoid recalculating cube state from scratch.
+- **Implementation**:
+  - `src/features/solver/SolutionPlayerController.js`: Non-UI state machine managing `Move[]`, `currentIndex`, playback status, progress stats, hint derivation, dynamic speed settings, busy-state guards, and coordination with `SimulatorController`.
+  - `src/features/solver/SolutionPlayerView.jsx`: Presentation component with horizontal auto-scrolling move rail, `.completed`, `.current` (`aria-current="step"`), and `.upcoming` chips, progress bar, hint card with human-readable directions, and accessible playback buttons (Restart, Prev, Play/Pause, Next) + speed selector pills.
+  - `src/features/solver/solutionPlayer.css`: Glassmorphic styling for track, progress bar, hint card, chips, and controls.
+  - `src/features/solver/SolverView.jsx`: Integrated `SolutionPlayerView` directly upon solution receipt, displaying both interactive player and raw notation summary.
+  - `src/features/simulator/SimulatorView.jsx`: Added docked Solution Player support when receiving `solutionMoves`, synchronizing real-time 3D rotations, undo, redo, and restart.
+  - `src/features/simulator/simulator.css`: Added styles for docked solution player overlay.
+  - `src/app/App.jsx`: Seamlessly passed `solutionMoves` between Solver and Simulator views.
+- **Verification & Testing**:
+  - `tests/features/SolutionPlayerController.test.js`: 25 unit tests covering initialization, forward/backward execution, restart, progress calculations, hints, autoplay loop, mathematical invariants, and simulator controller coordination.
+  - `tests/features/SolutionPlayerView.test.jsx`: 6 component unit tests covering empty solution state, move chips, step counts, progress bar, active chip accessibility attributes, controls, speed pills, and subscription lifecycle.
+  - `tests/features/SolutionSimulatorIntegration.test.js`: 3 end-to-end integration tests verifying forward solution playback to solved state, backward rewind to scramble, and restart restoration.
+  - Test run: 17 frontend suites (138 tests) + 1 backend suite (22 tests) = 160/160 tests passing (100%).
+  - Production build: `npm run build` completed cleanly in 1.11s with 0 errors.
+- **Checkpoint**:
+  - Phase 4 complete and verified. Ready for commit.
+

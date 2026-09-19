@@ -4,12 +4,15 @@
  * Displays:
  *  - Current cube state (Kociemba string + local validation)
  *  - Solve button → calls SolverController.solve()
- *  - Solution move list (token chips)
- *  - Error banner
- *  - Backend health badge
+ *  - Solution Player with step-by-step playback, progress, and hints
+ *  - Error banner & Backend health badge
+ *  - Link to open solution in 3D Simulator
  */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SolverController } from './SolverController.js';
+import { SolutionPlayerController } from './SolutionPlayerController.js';
+import { SolutionPlayerView } from './SolutionPlayerView.jsx';
 import './solver.css';
 
 /**
@@ -24,6 +27,7 @@ export function SolverView({ cubeState, onApplySolution }) {
   const [localValid, setLocalValid] = useState(null);  // null | { valid, error }
   const [solving, setSolving] = useState(false);
   const [result, setResult] = useState(null);           // { solution, raw, moveCount } | null
+  const [playerController, setPlayerController] = useState(null);
   const [error, setError] = useState(null);             // string | null
   const [health, setHealth] = useState('unknown');      // 'ok' | 'error' | 'unknown' | 'loading'
   const [cubeString, setCubeString] = useState('');
@@ -44,16 +48,22 @@ export function SolverView({ cubeState, onApplySolution }) {
 
     // Clear stale results when cube changes
     setResult(null);
+    setPlayerController(null);
     setError(null);
   }, [cubeState]);
 
-  // ── Health check on mount ────────────────────────────────────
-  useEffect(() => {
+  // ── Health check on mount (with retry support) ───────────────
+  const checkBackendHealth = useCallback(() => {
     setHealth('loading');
-    controllerRef.current = new SolverController(cubeState);
-    controllerRef.current.checkHealth()
+    const ctrl = controllerRef.current ?? new SolverController(cubeState);
+    controllerRef.current = ctrl;
+    ctrl.checkHealth()
       .then(() => setHealth('ok'))
       .catch(() => setHealth('error'));
+  }, [cubeState]);
+
+  useEffect(() => {
+    checkBackendHealth();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Solve ────────────────────────────────────────────────────
@@ -62,16 +72,26 @@ export function SolverView({ cubeState, onApplySolution }) {
     setSolving(true);
     setError(null);
     setResult(null);
+    setPlayerController(null);
 
     try {
       const res = await controllerRef.current.solve();
       setResult(res);
+
+      if (res.parsed && res.parsed.length > 0) {
+        const player = new SolutionPlayerController({
+          initialCubeState: cubeState.clone(),
+          moves: res.parsed,
+          playbackSpeed: 500,
+        });
+        setPlayerController(player);
+      }
     } catch (err) {
       setError(err.message ?? 'Unknown error from solver');
     } finally {
       setSolving(false);
     }
-  }, [localValid]);
+  }, [localValid, cubeState]);
 
   // ── Apply solution to simulator ──────────────────────────────
   const handleApply = useCallback(() => {
@@ -93,6 +113,15 @@ export function SolverView({ cubeState, onApplySolution }) {
            health === 'error'   ? '🔴 Backend offline' :
                                   '⚪ Unknown'}
         </span>
+        {health === 'error' && (
+          <button
+            className="solver-retry-btn"
+            onClick={checkBackendHealth}
+            title="Retry backend health check"
+          >
+            🔄 Retry
+          </button>
+        )}
       </div>
 
       {/* Current cube string */}
@@ -114,7 +143,7 @@ export function SolverView({ cubeState, onApplySolution }) {
       <button
         className="solver-btn"
         onClick={handleSolve}
-        disabled={!localValid?.valid || solving || health === 'error'}
+        disabled={!localValid?.valid || solving}
       >
         {solving ? '⏳ Solving…' : '🔍 Solve Cube'}
       </button>
@@ -126,33 +155,33 @@ export function SolverView({ cubeState, onApplySolution }) {
         </div>
       )}
 
-      {/* Solution display */}
+      {/* Solution Display & Solution Player */}
       {result && (
         <div className="solver-result">
           <div className="solver-result-header">
             <span className="solver-result-title">
               {result.moveCount === 0
                 ? '✅ Cube is already solved!'
-                : `Solution — ${result.moveCount} move${result.moveCount !== 1 ? 's' : ''}`}
+                : `Solution Generated — ${result.moveCount} move${result.moveCount !== 1 ? 's' : ''}`}
             </span>
             {result.moveCount > 0 && onApplySolution && (
               <button className="solver-apply-btn" onClick={handleApply}>
-                ▶ Play in Simulator
+                ▶ Open in 3D Simulator
               </button>
             )}
           </div>
 
-          {result.moveCount > 0 && (
-            <div className="solver-moves">
-              {result.solution.map((move, i) => (
-                <span key={i} className="solver-move-chip">{move}</span>
-              ))}
+          {/* Embedded Interactive Solution Player */}
+          {playerController && (
+            <div className="solver-player-wrapper">
+              <SolutionPlayerView controller={playerController} />
             </div>
           )}
 
+          {/* Raw Notation Summary */}
           {result.raw && (
             <div className="solver-raw">
-              <label className="solver-label">Raw notation</label>
+              <label className="solver-label">Raw notation sequence</label>
               <code className="solver-code">{result.raw}</code>
             </div>
           )}

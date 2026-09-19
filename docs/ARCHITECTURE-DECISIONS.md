@@ -117,3 +117,45 @@
   - In-browser JavaScript Kociemba port: Rejected in favor of the canonical Python/C Kociemba backend specified in project specifications.
 - **Consequences**:
   Clean client-server contract, full testability with mocked HTTP calls, zero state duplication, and seamless navigation between Simulator, Editor, and Solver.
+
+---
+
+## ADR-0008: Solution Player State Machine & Headless Simulator Coordination
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  Phase 4 requires step-by-step playback, progress tracking, hints, and 3D visual animation of Kociemba solutions. If the solution player were to implement its own animation loop, animation queue, or 3D meshes, it would duplicate the simulator engine and cause state desynchronization.
+- **Decision**:
+  1. `SolutionPlayerController` is designed as a headless domain state machine owning solution moves (`Move[]`), current playback index (`0..N`), status (`idle`, `playing`, `paused`, `completed`), progress stats, and natural-language hint generation.
+  2. The single source of truth for cube transformations remains `CubeState` and `applyMove`.
+  3. Reverse navigation (`stepBackward()`) uses standard `Move.inverse()` to step backward without recomputing the cube state.
+  4. The solution player coordinates with the existing `SimulatorController` by dispatching requested forward and inverse moves into `simulatorController.applyMove()`.
+  5. 3D rotational animations, FIFO sequential queuing, and Three.js mesh state remain the sole responsibility of `SimulatorController`, `AnimationQueue`, and `CubeRenderer`.
+  6. Rapid user inputs and autoplay ticks are guarded against race conditions by checking `simulatorController.queue.isBusy()`.
+  7. `SolutionPlayerView` is built as a reusable React component supporting move highlighting (`completed`, `current`, `upcoming`), accessibility landmarks (`aria-current="step"`, `aria-label`), auto-scrolling rail, and speed presets.
+- **Alternatives Considered**:
+  - Independent animation engine in the solution player: Rejected because it violates single source of truth and causes visual drift.
+  - Plain string move manipulation: Rejected in favor of structured `Move` instances and `parseAlgorithm`.
+- **Consequences**:
+  100% state synchronization, zero duplicated animation logic, complete testability without DOM/WebGL requirements, and seamless embedding across both the Solver and 3D Simulator views.
+
+---
+
+## ADR-0009: Speedcubing Timer State Machine, Monotonic Timing, and Persistence
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  Phase 5 introduces a WCA-style speedcubing timer with inspection, solve recording, penalties, statistics, and solve history. The timer must be architecturally independent from the authoritative `CubeState`, must not rely on UI render frame rates or `setInterval` for elapsed timing, and must preserve raw solve times while tracking penalties.
+- **Decision**:
+  1. **Strict Separation of Concerns**: The timer state machine (`TimerController.js`) owns the timer lifecycle (`IDLE` -> `INSPECTION` -> `READY` -> `RUNNING` -> `STOPPED` -> `SAVED`). It does not own or mutate the authoritative `CubeState`. Scrambles are generated using the existing `generateScrambleString` domain utility.
+  2. **Monotonic High-Resolution Timing**: Timer elapsed duration is derived strictly from `(now() - startTime)` using `performance.now()`. Display loops run purely for visual UI refreshes without affecting raw timing. The clock source is injectable (`options.now`) allowing 100% deterministic unit testing.
+  3. **WCA Inspection & Penalty Integrity**: 15-second inspection countdown triggers automatic +2 (15s–17s) and DNF (>17s) penalties. Raw `timeMs` is permanently frozen upon stopping and NEVER mutated to represent penalties. Penalties are stored as a separate attribute (`null`, `'+2'`, `'DNF'`).
+  4. **Pure Statistics Engine**: `statistics.js` computes effective times, best singles, session mean, Ao5, Ao12, Ao50, and Ao100 using standard WCA trimmed averaging (e.g. Ao5 trims 1 fastest and 1 slowest, counting 1 DNF as worst solve and >1 DNF as DNF).
+  5. **Resilient Client Storage & Multi-Format Export**: `solveStorage.js` isolates localStorage persistence, validating and normalizing solve records, safely handling corrupted data, and providing JSON and RFC-compliant CSV export.
+  6. **Bridge Navigation**: Timer and History views allow instantaneous loading of scrambles into the 3D Simulator and Solver without mutating authoritative state unexpectedly.
+- **Alternatives Considered**:
+  - Timer driving simulator directly: Rejected to prevent coupling inspection and solving with simulator rendering.
+  - Deriving time from interval counts: Rejected because browser timer throttling causes severe time drift.
+- **Consequences**:
+  Ultra-precise, non-drifting speedcubing timer; reliable persistence across reloads; pure testable statistics; and zero interference with the existing simulator and solver architecture.
+

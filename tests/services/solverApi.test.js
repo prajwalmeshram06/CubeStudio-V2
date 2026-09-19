@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { health, validate, solve, SolverApiError } from '../../src/services/solverApi.js';
+import { health, validate, solve, getApiBase, SolverApiError } from '../../src/services/solverApi.js';
 
 describe('solverApi service', () => {
   const originalFetch = global.fetch;
@@ -23,7 +23,7 @@ describe('solverApi service', () => {
 
       const res = await health();
       expect(res).toEqual(mockPayload);
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/v1/health');
+      expect(global.fetch).toHaveBeenCalledWith(`${getApiBase()}/api/v1/health`);
     });
 
     it('throws SolverApiError on network failure', async () => {
@@ -79,7 +79,7 @@ describe('solverApi service', () => {
       const res = await validate(cube);
       expect(res).toEqual(mockPayload);
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:5000/api/v1/validate',
+        `${getApiBase()}/api/v1/validate`,
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

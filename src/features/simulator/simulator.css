@@ -2,12 +2,22 @@
 
 .simulator-container {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background-color: #0b0f19;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.simulator-viewport-wrapper {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .viewport-container {
@@ -119,7 +129,23 @@
   gap: 12px;
   pointer-events: auto;
   z-index: 10;
+  transition: bottom 0.2s ease;
 }
+
+.has-solution-player .simulator-toolbar {
+  bottom: 12px;
+  gap: 8px;
+}
+
+.has-solution-player .simulator-toolbar .face-buttons-bar {
+  display: none; /* Hide individual face buttons to maximize cube view while keeping all undo/redo/view/reset actions */
+}
+
+.has-solution-player .keyboard-hint,
+.has-solution-player .speed-control {
+  bottom: 12px;
+}
+
 
 .face-buttons-bar {
   display: flex;
@@ -249,4 +275,15 @@
   color: #e2e8f0;
   font-family: monospace;
   font-weight: 700;
+}
+
+/* Docked Solution Player in 3D Simulator (dedicated non-overlapping bottom panel) */
+.simulator-solution-player-dock {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 0.85rem 1rem;
+  box-sizing: border-box;
+  z-index: 25;
 }

@@ -41,6 +41,20 @@
 .solver-health--error { color: #ff6b6b; }
 .solver-health--unknown { color: #aaaaaa; }
 
+.solver-retry-btn {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  border-radius: 6px;
+  background: rgba(255, 107, 107, 0.12);
+  color: #ff9b9b;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.solver-retry-btn:hover { background: rgba(255, 107, 107, 0.25); }
+
 /* Cube string */
 .solver-cube-string {
   display: flex;

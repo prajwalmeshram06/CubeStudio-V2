@@ -1,0 +1,363 @@
+/* CubeStudio V2 - Speedcubing Timer Styles */
+
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  color: #f1f5f9;
+  user-select: none;
+}
+
+/* ── Top Bar: Scramble & Settings ─────────────────────────────── */
+.timer-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.timer-scramble-card {
+  width: 100%;
+  background: #151b2b;
+  border: 1px solid #28334e;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.timer-scramble-text {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #e2e8f0;
+  text-align: center;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.timer-scramble-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer-icon-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.timer-icon-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.timer-settings-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0.5rem;
+}
+
+.timer-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.timer-toggle-checkbox {
+  accent-color: #3b82f6;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.timer-view-tabs {
+  display: flex;
+  background: #1e293b;
+  padding: 3px;
+  border-radius: 8px;
+  gap: 3px;
+}
+
+.timer-tab-btn {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.timer-tab-btn.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+/* ── Main Big Timer Display ──────────────────────────────────── */
+.timer-display-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  position: relative;
+  cursor: pointer;
+}
+
+.timer-status-badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.status--idle { color: #64748b; }
+.status--inspection { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+.status--warning { color: #ef4444; background: rgba(239, 68, 68, 0.15); animation: pulseWarning 1s infinite; }
+.status--ready { color: #10b981; background: rgba(16, 185, 129, 0.15); }
+.status--running { color: #3b82f6; }
+.status--stopped { color: #f8fafc; }
+.status--saved { color: #10b981; }
+
+@keyframes pulseWarning {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+.timer-digits {
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+  font-size: 5.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 0.15s ease;
+}
+
+.timer-digits.ready {
+  color: #10b981;
+  text-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+}
+
+.timer-digits.inspection {
+  color: #f59e0b;
+}
+
+.timer-digits.warning {
+  color: #ef4444;
+}
+
+.timer-digits.stopped {
+  color: #f8fafc;
+}
+
+.timer-digits.penalty-dnf {
+  color: #ef4444;
+}
+
+.timer-digits.penalty-plus-two {
+  color: #f59e0b;
+}
+
+.timer-interaction-hint {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* ── Post-Solve Action Controls ──────────────────────────────── */
+.timer-post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #151b2b;
+  border: 1px solid #28334e;
+  border-radius: 12px;
+}
+
+.timer-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-penalty {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-penalty.active {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-penalty.plus-two.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #ffffff;
+}
+
+.btn-timer-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #3b82f6;
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-timer-primary:hover {
+  background: #2563eb;
+}
+
+.btn-timer-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-timer-secondary:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.timer-move-count-input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.timer-number-input {
+  width: 50px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  border-radius: 4px;
+  padding: 0.25rem 0.4rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ── Live Quick Stats Bar ─────────────────────────────────────── */
+.timer-quick-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.stat-pill {
+  background: #151b2b;
+  border: 1px solid #28334e;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.stat-value.highlight {
+  color: #3b82f6;
+}
+
+.stat-value.best {
+  color: #10b981;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .timer-digits {
+    font-size: 3.75rem;
+  }
+  .timer-scramble-text {
+    font-size: 1rem;
+  }
+  .timer-post-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}

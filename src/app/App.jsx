@@ -1,17 +1,20 @@
 /**
  * CubeStudio V2 - Main React Application
- * Provides navigation between 3D Simulator, Manual Editor, and Solver.
+ * Provides navigation between 3D Simulator, Manual Editor, Solver, and Speedcubing Timer.
  */
 
 import React, { useState } from 'react';
 import { SimulatorView } from '../features/simulator/SimulatorView.jsx';
 import { EditorView } from '../features/editor/EditorView.jsx';
 import { SolverView } from '../features/solver/SolverView.jsx';
+import { TimerView } from '../features/timer/TimerView.jsx';
 import { CubeState } from '../cube/model/CubeState.js';
+import { parseAlgorithm } from '../cube/model/notation.js';
+import { applyMove } from '../cube/engine/applyMove.js';
 import './app.css';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver'
+  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver' | 'timer'
   const [sharedCubeState, setSharedCubeState] = useState(() => CubeState.createSolved());
   const [pendingSolutionMoves, setPendingSolutionMoves] = useState(null);
 
@@ -20,8 +23,22 @@ export function App() {
     setActiveTab('editor');
   };
 
-  const handleOpenSolver = (state) => {
-    if (state) setSharedCubeState(state);
+  const handleOpenSolver = (stateOrScramble) => {
+    if (typeof stateOrScramble === 'string') {
+      // Scramble algorithm string from Timer
+      let state = CubeState.createSolved();
+      try {
+        const moves = parseAlgorithm(stateOrScramble);
+        for (const m of moves) {
+          state = applyMove(state, m);
+        }
+      } catch (err) {
+        console.warn('Failed to parse scramble:', err);
+      }
+      setSharedCubeState(state);
+    } else if (stateOrScramble) {
+      setSharedCubeState(stateOrScramble);
+    }
     setActiveTab('solver');
   };
 
@@ -33,6 +50,21 @@ export function App() {
 
   const handleApplySolution = (moves) => {
     setPendingSolutionMoves(moves);
+    setActiveTab('simulator');
+  };
+
+  const handleOpenSimulatorWithScramble = (scrambleString) => {
+    let state = CubeState.createSolved();
+    try {
+      const moves = parseAlgorithm(scrambleString);
+      for (const m of moves) {
+        state = applyMove(state, m);
+      }
+    } catch (err) {
+      console.warn('Failed to parse scramble for simulator:', err);
+    }
+    setSharedCubeState(state);
+    setPendingSolutionMoves(null);
     setActiveTab('simulator');
   };
 
@@ -58,15 +90,21 @@ export function App() {
         >
           Solver
         </button>
+        <button
+          className={`nav-tab ${activeTab === 'timer' ? 'active' : ''}`}
+          onClick={() => setActiveTab('timer')}
+        >
+          Timer
+        </button>
       </nav>
 
       {/* Main Content Area */}
       <main className="app-content">
         {activeTab === 'simulator' && (
           <SimulatorView
-            key={sharedCubeState.serialize('string') + (pendingSolutionMoves ? '-sol' : '')}
+            key="simulator-main"
             initialCubeState={sharedCubeState}
-            initialAlgorithm={pendingSolutionMoves}
+            solutionMoves={pendingSolutionMoves}
             onOpenEditor={handleOpenEditor}
             onOpenSolver={handleOpenSolver}
           />
@@ -82,6 +120,12 @@ export function App() {
           <SolverView
             cubeState={sharedCubeState}
             onApplySolution={handleApplySolution}
+          />
+        )}
+        {activeTab === 'timer' && (
+          <TimerView
+            onOpenSimulator={handleOpenSimulatorWithScramble}
+            onOpenSolver={handleOpenSolver}
           />
         )}
       </main>

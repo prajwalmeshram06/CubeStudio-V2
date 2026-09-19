@@ -1,0 +1,493 @@
+/* ──────────────────────────────────────────────────────────
+   solutionPlayer.css — CubeStudio V2 Solution Player Theme
+   Matches the glassmorphic dark theme and visual tokens.
+   ────────────────────────────────────────────────────────── */
+
+.solution-player {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  color: #e2e8f0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Header & Progress Info ─────────────────────────────── */
+.solution-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.solution-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.solution-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.solution-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.solution-step-counter {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solution-percent-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+}
+
+.solution-status-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.solution-status-tag.playing   { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+.solution-status-tag.paused    { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
+.solution-status-tag.completed { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+.solution-status-tag.idle      { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+/* Progress bar */
+.solution-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.solution-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  border-radius: 999px;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Move Track / Rail ──────────────────────────────────── */
+.solution-move-track-container {
+  position: relative;
+  width: 100%;
+}
+
+.solution-move-track {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scroll-behavior: smooth;
+}
+
+.solution-move-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.solution-move-track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.solution-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  min-width: 2.2rem;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.solution-chip .chip-num {
+  font-size: 0.62rem;
+  font-weight: 500;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+
+/* State variants */
+.solution-chip.completed {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+  opacity: 0.75;
+}
+
+.solution-chip.completed:hover {
+  opacity: 1;
+  background: rgba(34, 197, 94, 0.18);
+}
+
+.solution-chip.current {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(139, 92, 246, 0.35));
+  border: 2px solid #60a5fa;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 0 14px rgba(96, 165, 250, 0.55);
+  z-index: 2;
+}
+
+.solution-chip.current .chip-num {
+  color: #93c5fd;
+  opacity: 1;
+  font-weight: 700;
+}
+
+.solution-chip.upcoming {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.solution-chip.upcoming:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* ── Hint Box ───────────────────────────────────────────── */
+.solution-hint-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.solution-hint-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.solution-hint-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  flex-shrink: 0;
+}
+
+.solution-hint-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.solution-hint-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.solution-hint-desc {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.solution-hint-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+}
+
+.solution-hint-card.completed {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.solution-hint-card.completed .solution-hint-icon {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+/* ── Playback Controls Bar ──────────────────────────────── */
+.solution-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.solution-main-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #e2e8f0;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.player-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.player-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.player-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.player-btn-play {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border: 1px solid rgba(147, 197, 253, 0.4);
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+}
+
+.player-btn-play:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
+}
+
+.player-btn-pause {
+  background: rgba(234, 179, 8, 0.25);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #fef08a;
+  padding: 0.55rem 1.25rem;
+}
+
+.player-btn-pause:hover:not(:disabled) {
+  background: rgba(234, 179, 8, 0.35);
+}
+
+/* Speed Selector Pills */
+.solution-speed-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.speed-pill {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.speed-pill:hover:not(.active) {
+  color: #f1f5f9;
+}
+
+.speed-pill.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Empty solved box */
+.solution-empty-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: #86efac;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Compact Modifier — used when docked in 3D Simulator
+   Preserves full 3D cube visibility while retaining all controls.
+   ────────────────────────────────────────────────────────── */
+.solution-player--compact {
+  padding: 0.65rem 0.95rem;
+  gap: 0.5rem;
+  border-radius: 12px;
+}
+
+.solution-player--compact .solution-player-header {
+  gap: 0.4rem;
+}
+
+.solution-player--compact .solution-step-counter {
+  font-size: 0.82rem;
+}
+
+.solution-player--compact .solution-percent-badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+}
+
+.solution-player--compact .solution-status-tag {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.solution-player--compact .solution-progress-track {
+  height: 4px;
+}
+
+.solution-player--compact .solution-move-track {
+  padding: 0.25rem 0.2rem 0.35rem 0.2rem;
+  gap: 0.35rem;
+}
+
+.solution-player--compact .solution-chip {
+  padding: 0.25rem 0.55rem;
+  min-width: 1.8rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
+
+.solution-player--compact .solution-chip .chip-num {
+  font-size: 0.55rem;
+}
+
+.solution-player--compact .solution-hint-card {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  gap: 0.5rem;
+}
+
+.solution-player--compact .solution-hint-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+}
+
+.solution-player--compact .solution-hint-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.solution-player--compact .solution-hint-label {
+  font-size: 0.6rem;
+}
+
+.solution-player--compact .solution-hint-desc {
+  font-size: 0.78rem;
+}
+
+.solution-player--compact .solution-hint-badge {
+  font-size: 0.9rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.solution-player--compact .solution-controls-bar {
+  gap: 0.5rem;
+  padding-top: 0;
+}
+
+.solution-player--compact .player-btn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  border-radius: 7px;
+  gap: 0.3rem;
+}
+
+.solution-player--compact .player-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.solution-player--compact .player-btn-play,
+.solution-player--compact .player-btn-pause {
+  padding: 0.4rem 0.95rem;
+}
+
+.solution-player--compact .speed-pill {
+  font-size: 0.68rem;
+  padding: 0.18rem 0.38rem;
+}
+
