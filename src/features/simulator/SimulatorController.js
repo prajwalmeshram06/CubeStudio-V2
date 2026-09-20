@@ -35,7 +35,28 @@ export class SimulatorController {
     });
 
     this._listeners = new Set();
+    this._moveListeners = new Set();
     this._lastMove = null;
+  }
+
+  /**
+   * Subscribes to authoritative move execution events.
+   * @param {(event: { move: string, moveObj: import('../../cube/model/moves.js').Move, source: string, timestamp: number, state: CubeState }) => void} listener
+   * @returns {() => void} unsubscribe
+   */
+  onMove(listener) {
+    this._moveListeners.add(listener);
+    return () => this._moveListeners.delete(listener);
+  }
+
+  _notifyMoveListeners(event) {
+    for (const listener of this._moveListeners) {
+      try {
+        listener(event);
+      } catch (err) {
+        console.error('[SimulatorController] Error in move listener:', err);
+      }
+    }
   }
 
   /**
@@ -88,6 +109,7 @@ export class SimulatorController {
    * @param {import('../../cube/model/moves.js').Move|string} moveInput
    * @param {object} [options]
    * @param {boolean} [options.instant=false]
+   * @param {string} [options.source='user']
    */
   applyMove(moveInput, options = {}) {
     const move = typeof moveInput === 'string' ? parseMove(moveInput) : moveInput;
@@ -95,6 +117,7 @@ export class SimulatorController {
       this.queue.enqueue({
         move,
         instant: options.instant || this.animationSpeed === 0,
+        source: options.source || 'user',
         resolve
       });
     });
@@ -104,12 +127,14 @@ export class SimulatorController {
    * Applies an algorithm string (e.g. "R U R' U'").
    * @param {string} algorithm
    * @param {object} [options]
+   * @param {string} [options.source='algorithm']
    */
   applyAlgorithm(algorithm, options = {}) {
     const moves = parseAlgorithm(algorithm);
     const items = moves.map(move => ({
       move,
-      instant: options.instant || this.animationSpeed === 0
+      instant: options.instant || this.animationSpeed === 0,
+      source: options.source || 'algorithm'
     }));
     this.queue.enqueueAll(items);
   }
@@ -118,7 +143,7 @@ export class SimulatorController {
    * Processor invoked by AnimationQueue for each move item.
    */
   async _processQueueMove(item) {
-    const { move, instant } = item;
+    const { move, instant, source = 'user' } = item;
     this._lastMove = move;
 
     // 1. Calculate next state using pure Cube Engine
@@ -140,7 +165,17 @@ export class SimulatorController {
       this.renderer.syncWithState(this.cubeState);
     }
 
-    // 6. Notify UI
+    // 6. Notify authoritative move listeners
+    const moveEvent = {
+      move: move.notation,
+      moveObj: move,
+      source,
+      timestamp: Date.now(),
+      state: this.cubeState
+    };
+    this._notifyMoveListeners(moveEvent);
+
+    // 7. Notify UI
     this._notifyListeners();
 
     if (typeof item.resolve === 'function') {
@@ -162,7 +197,8 @@ export class SimulatorController {
     if (animated) {
       const items = moves.map(move => ({
         move,
-        instant: false
+        instant: false,
+        source: 'scramble'
       }));
       this.queue.enqueueAll(items);
     } else {

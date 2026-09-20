@@ -2,7 +2,7 @@
  * MoveTrainerController.js — Move & Notation Drill State Machine.
  *
  * Provides structured training for single moves, move families (primes, doubles),
- * notation interpretation, and short sequence drills with instant feedback.
+ * notation interpretation, and short sequence drills with instant authoritative feedback.
  */
 
 import { parseMove, parseAlgorithm } from '../../../cube/model/notation.js';
@@ -51,6 +51,7 @@ export class MoveTrainerController {
 
     this.currentPrompt = null;
     this.performedSequence = [];
+    this.lastExecutedMove = null;
     this.status = 'idle'; // 'idle' | 'waiting' | 'success' | 'mistake'
     this.lastFeedback = null;
     this.startTime = null;
@@ -88,17 +89,20 @@ export class MoveTrainerController {
   }
 
   getState() {
+    const accuracy = this.stats.totalAttempts > 0
+      ? Math.round((this.stats.successfulAttempts / this.stats.totalAttempts) * 100)
+      : (this.stats.totalAttempts === 0 ? 100 : 0);
+
     return {
       mode: this.mode,
       filterGroup: this.filterGroup,
       currentPrompt: this.currentPrompt,
       performedSequence: [...this.performedSequence],
+      lastExecutedMove: this.lastExecutedMove,
       status: this.status,
       lastFeedback: this.lastFeedback,
       stats: { ...this.stats },
-      accuracy: this.stats.totalAttempts > 0
-        ? Math.round((this.stats.successfulAttempts / this.stats.totalAttempts) * 100)
-        : 100
+      accuracy
     };
   }
 
@@ -136,7 +140,9 @@ export class MoveTrainerController {
 
   nextPrompt() {
     this.performedSequence = [];
+    this.lastExecutedMove = null;
     this.status = 'waiting';
+    this.lastFeedback = null;
     this.startTime = Date.now();
 
     if (this.mode === TRAINER_MODES.SEQUENCE_DRILL) {
@@ -152,7 +158,6 @@ export class MoveTrainerController {
       };
     } else {
       const pool = this._getMovesForGroup(this.filterGroup);
-      // Avoid picking the exact same move consecutively if pool > 1
       let pick = pool[Math.floor(Math.random() * pool.length)];
       if (this.currentPrompt && pool.length > 1 && pick === this.currentPrompt.expected) {
         pick = pool.find(m => m !== this.currentPrompt.expected) || pick;
@@ -180,7 +185,7 @@ export class MoveTrainerController {
   }
 
   /**
-   * Observe a move performed by the user on the simulator.
+   * Observe an authoritative move performed by the user on the simulator.
    * @param {string} moveNotation
    */
   observeMove(moveNotation) {
@@ -193,13 +198,20 @@ export class MoveTrainerController {
       this.performedSequence.push(moveNotation);
       const result = detectSequenceDivergence(this.currentPrompt.expected, this.performedSequence);
 
+      this.lastExecutedMove = {
+        move: moveNotation,
+        isCorrect: result.isCorrect,
+        mistakeType: result.type,
+        timestamp: Date.now()
+      };
+
       if (result.isComplete && result.isCorrect) {
         this.status = 'success';
         this.lastFeedback = {
           isCorrect: true,
           mistakeType: MISTAKE_TYPES.CORRECT,
           message: `✓ Perfect! Completed ${this.currentPrompt.name} (${this.currentPrompt.expected}) in ${(timeSpent / 1000).toFixed(1)}s.`,
-          tip: 'Ready for next prompt!'
+          tip: 'Ready for next challenge!'
         };
         recordTrainerAttempt(trainerKey, {
           expected: this.currentPrompt.expected,
@@ -240,6 +252,13 @@ export class MoveTrainerController {
       // Single move validation
       const result = detectMoveMistake(this.currentPrompt.expected, moveNotation);
 
+      this.lastExecutedMove = {
+        move: moveNotation,
+        isCorrect: result.isCorrect,
+        mistakeType: result.type,
+        timestamp: Date.now()
+      };
+
       if (result.isCorrect) {
         this.status = 'success';
         this.lastFeedback = result;
@@ -267,8 +286,34 @@ export class MoveTrainerController {
     this.notify();
   }
 
+  /**
+   * Skips the current prompt, recording a skipped attempt without increasing accuracy.
+   */
+  skipPrompt() {
+    if (!this.currentPrompt) return;
+
+    if (this.status !== 'success') {
+      const timeSpent = this.startTime ? Date.now() - this.startTime : 0;
+      const trainerKey = this.mode === TRAINER_MODES.NOTATION_READING ? 'notationTrainer' : 'moveTrainer';
+
+      recordTrainerAttempt(trainerKey, {
+        expected: typeof this.currentPrompt.expected === 'string'
+          ? this.currentPrompt.expected
+          : JSON.stringify(this.currentPrompt.expected),
+        actual: null,
+        isCorrect: false,
+        mistakeType: MISTAKE_TYPES.SKIPPED,
+        timeMs: timeSpent
+      }, this.storage);
+      this._syncStats();
+    }
+
+    this.nextPrompt();
+  }
+
   resetCurrent() {
     this.performedSequence = [];
+    this.lastExecutedMove = null;
     this.status = 'waiting';
     this.lastFeedback = null;
     this.startTime = Date.now();

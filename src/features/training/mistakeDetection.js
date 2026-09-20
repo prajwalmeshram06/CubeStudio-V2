@@ -16,6 +16,7 @@ export const MISTAKE_TYPES = Object.freeze({
   MISSING_MOVE: 'missing_move',
   DIVERGED: 'diverged',
   TIMEOUT: 'timeout',
+  SKIPPED: 'skipped',
   UNKNOWN: 'unknown'
 });
 

@@ -1,5 +1,6 @@
 /**
  * MoveTrainerPanel.jsx — Interactive UI for Move, Notation, and Sequence Drills.
+ * Connected to authoritative 3D Simulator move events.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,26 +14,40 @@ export function MoveTrainerPanel({ simulatorController, storage }) {
     return controller.subscribe(newState => setState(newState));
   }, [controller]);
 
-  // Hook simulator moves to trainer observation
+  // Hook authoritative simulator moves to trainer observation
   useEffect(() => {
-    if (!simulatorController) return;
-    const unsub = simulatorController.subscribe(simState => {
-      if (simState.lastMove && simState.lastMoveTime) {
-        controller.observeMove(simState.lastMove);
+    if (!simulatorController || typeof simulatorController.onMove !== 'function') return;
+
+    const unsub = simulatorController.onMove((event) => {
+      if (event.source === 'user') {
+        controller.observeMove(event.move);
       }
     });
-    return unsub;
+
+    return () => {
+      unsub();
+    };
   }, [simulatorController, controller]);
 
   const handleManualMove = async (moveToken) => {
     if (simulatorController) {
-      await simulatorController.applyMove(moveToken);
+      await simulatorController.applyMove(moveToken, { source: 'user' });
     } else {
       controller.observeMove(moveToken);
     }
   };
 
-  const { mode, filterGroup, currentPrompt, status, lastFeedback, stats, accuracy, performedSequence } = state;
+  const {
+    mode,
+    filterGroup,
+    currentPrompt,
+    status,
+    lastFeedback,
+    lastExecutedMove,
+    stats,
+    accuracy,
+    performedSequence
+  } = state;
 
   return (
     <div className="trainer-panel">
@@ -125,17 +140,36 @@ export function MoveTrainerPanel({ simulatorController, storage }) {
           )}
         </div>
 
+        {/* Real-Time Move Observation Feedback */}
+        {lastExecutedMove && mode !== TRAINER_MODES.SEQUENCE_DRILL && (
+          <div className="last-executed-banner">
+            <span className="executed-label">Actual Executed:</span>
+            <span className={`executed-chip ${lastExecutedMove.isCorrect ? 'chip-correct' : 'chip-mistake'}`}>
+              {lastExecutedMove.move} {lastExecutedMove.isCorrect ? '✓' : '✗'}
+            </span>
+          </div>
+        )}
+
         {/* Progress for Sequence Drill */}
         {mode === TRAINER_MODES.SEQUENCE_DRILL && (
           <div className="sequence-progress">
             <div className="sequence-label">Your Input:</div>
             <div className="sequence-chips">
               {performedSequence.length === 0 ? (
-                <span className="empty-seq">Waiting for first move...</span>
+                <span className="empty-seq">Waiting for first move on cube...</span>
               ) : (
-                performedSequence.map((m, idx) => (
-                  <span key={idx} className="seq-chip done">{m}</span>
-                ))
+                performedSequence.map((m, idx) => {
+                  const expected = currentPrompt?.expectedMoves?.[idx];
+                  const isMatch = expected === m;
+                  return (
+                    <span
+                      key={idx}
+                      className={`seq-chip ${isMatch ? 'done' : 'diverged'}`}
+                    >
+                      {m} {isMatch ? '✓' : '✗'}
+                    </span>
+                  );
+                })
               )}
             </div>
           </div>
@@ -151,12 +185,21 @@ export function MoveTrainerPanel({ simulatorController, storage }) {
 
         {/* Action Controls */}
         <div className="prompt-actions">
-          <button
-            className="btn-next-prompt"
-            onClick={() => controller.nextPrompt()}
-          >
-            {status === 'success' ? 'Next Challenge →' : 'Skip / Next →'}
-          </button>
+          {status === 'success' ? (
+            <button
+              className="btn-next-prompt"
+              onClick={() => controller.nextPrompt()}
+            >
+              Next Challenge →
+            </button>
+          ) : (
+            <button
+              className="btn-skip-prompt"
+              onClick={() => controller.skipPrompt()}
+            >
+              Skip
+            </button>
+          )}
           <button
             className="btn-retry"
             onClick={() => controller.resetCurrent()}

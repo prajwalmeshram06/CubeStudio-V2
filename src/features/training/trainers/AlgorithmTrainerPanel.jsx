@@ -1,5 +1,6 @@
 /**
  * AlgorithmTrainerPanel.jsx — Interactive UI for CFOP & Algorithm Mastery.
+ * Connected to authoritative 3D Simulator move events.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,15 +16,19 @@ export function AlgorithmTrainerPanel({ simulatorController, storage }) {
     return controller.subscribe(newState => setState(newState));
   }, [controller]);
 
-  // Hook simulator moves to trainer
+  // Hook authoritative simulator moves to trainer
   useEffect(() => {
-    if (!simulatorController) return;
-    const unsub = simulatorController.subscribe(simState => {
-      if (simState.lastMove && simState.lastMoveTime) {
-        controller.observeMove(simState.lastMove);
+    if (!simulatorController || typeof simulatorController.onMove !== 'function') return;
+
+    const unsub = simulatorController.onMove((event) => {
+      if (event.source === 'user') {
+        controller.observeMove(event.move);
       }
     });
-    return unsub;
+
+    return () => {
+      unsub();
+    };
   }, [simulatorController, controller]);
 
   const {
@@ -52,7 +57,7 @@ export function AlgorithmTrainerPanel({ simulatorController, storage }) {
 
   const handleManualMove = async (moveToken) => {
     if (simulatorController) {
-      await simulatorController.applyMove(moveToken);
+      await simulatorController.applyMove(moveToken, { source: 'user' });
     } else {
       controller.observeMove(moveToken);
     }
@@ -135,16 +140,21 @@ export function AlgorithmTrainerPanel({ simulatorController, storage }) {
             <div className="alg-step-chips">
               {expectedMoves.map((m, idx) => {
                 let stepState = 'pending';
-                if (idx < currentStepIndex) stepState = 'done';
-                else if (idx === currentStepIndex) stepState = 'active';
+                if (idx < currentStepIndex && status !== 'diverged') stepState = 'done';
+                else if (idx < divergenceInfo?.divergenceIndex) stepState = 'done';
+                else if (idx === currentStepIndex && status !== 'diverged') stepState = 'active';
+
+                const isDivergedAtThisStep = status === 'diverged' && idx === divergenceInfo?.divergenceIndex;
 
                 return (
                   <span
                     key={idx}
-                    className={`step-chip ${stepState} ${status === 'diverged' && idx === divergenceInfo?.divergenceIndex ? 'diverged' : ''}`}
+                    className={`step-chip ${stepState} ${isDivergedAtThisStep ? 'diverged' : ''}`}
                   >
                     <span className="step-num">{idx + 1}</span>
-                    <span className="step-move">{m}</span>
+                    <span className="step-move">
+                      {m} {stepState === 'done' ? '✓' : isDivergedAtThisStep ? '✗' : ''}
+                    </span>
                   </span>
                 );
               })}
@@ -175,10 +185,13 @@ export function AlgorithmTrainerPanel({ simulatorController, storage }) {
           <div className="alg-actions-row">
             <div className="nav-buttons">
               <button className="btn-nav" onClick={() => controller.prevAlgorithm()}>
-                ← Previous
+                ← Prev Case
               </button>
               <button className="btn-nav" onClick={() => controller.nextAlgorithm()}>
                 Next Case →
+              </button>
+              <button className="btn-skip-alg" onClick={() => controller.skipAlgorithm()}>
+                Skip Case
               </button>
             </div>
             <button className="btn-retry" onClick={() => controller.resetPractice()}>
@@ -190,7 +203,7 @@ export function AlgorithmTrainerPanel({ simulatorController, storage }) {
 
       {/* Virtual Keypad */}
       <div className="trainer-keypad">
-        <div className="keypad-title">Interactive Move Buttons</div>
+        <div className="keypad-title">Interactive Move Buttons (or press keys on keyboard)</div>
         <div className="keypad-grid">
           {['U', "U'", 'U2', 'D', "D'", 'D2', 'R', "R'", 'R2', 'L', "L'", 'L2', 'F', "F'", 'F2', 'B', "B'", 'B2'].map(token => (
             <button

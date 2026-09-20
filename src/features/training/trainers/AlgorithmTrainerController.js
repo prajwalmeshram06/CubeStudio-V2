@@ -116,6 +116,7 @@ export class AlgorithmTrainerController {
 
   /**
    * Applies the algorithm's setup sequence to the simulator.
+   * Marked with source: 'setup' so it is not treated as a user training move.
    * @param {import('../../simulator/SimulatorController.js').SimulatorController} simulatorController
    */
   async applySetupToSimulator(simulatorController) {
@@ -123,10 +124,9 @@ export class AlgorithmTrainerController {
     this.resetPractice();
 
     try {
-      // Reset simulator to solved state first
       simulatorController.reset();
       if (this.selectedAlgorithm.setup) {
-        await simulatorController.applyAlgorithm(this.selectedAlgorithm.setup);
+        await simulatorController.applyAlgorithm(this.selectedAlgorithm.setup, { source: 'setup' });
       }
       this.status = 'practicing';
       this.startTime = Date.now();
@@ -137,11 +137,11 @@ export class AlgorithmTrainerController {
   }
 
   /**
-   * Observe a user move on the simulator.
+   * Observe an authoritative user move on the simulator.
    * @param {string} moveNotation
    */
   observeMove(moveNotation) {
-    if (!this.selectedAlgorithm || this.status === 'success') return;
+    if (!this.selectedAlgorithm || this.status === 'success' || this.status === 'diverged') return;
 
     if (!this.startTime) {
       this.startTime = Date.now();
@@ -205,6 +205,21 @@ export class AlgorithmTrainerController {
     }
 
     this.notify();
+  }
+
+  skipAlgorithm() {
+    if (!this.selectedAlgorithm) return;
+    if (this.status !== 'success') {
+      recordAlgorithmAttempt({
+        algorithmId: this.selectedAlgorithm.id,
+        isCorrect: false,
+        mistakeType: MISTAKE_TYPES.SKIPPED,
+        timeMs: this.elapsedMs || 0,
+        movesCompleted: this.executedMoves.length,
+        totalMoves: this.selectedAlgorithm.moveCount
+      }, this.storage);
+    }
+    this.nextAlgorithm();
   }
 
   nextAlgorithm() {
