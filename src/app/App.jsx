@@ -5,12 +5,13 @@
  */
 
 import React, { useState } from 'react';
-import { Box, Layers, Wand2, Timer, GraduationCap } from 'lucide-react';
+import { Box, Layers, Wand2, Timer, GraduationCap, Camera } from 'lucide-react';
 import { SimulatorView } from '../features/simulator/SimulatorView.jsx';
 import { EditorView } from '../features/editor/EditorView.jsx';
 import { SolverView } from '../features/solver/SolverView.jsx';
 import { TimerView } from '../features/timer/TimerView.jsx';
 import { TrainingView } from '../features/training/TrainingView.jsx';
+import { ScannerView } from '../features/scanner/ScannerView.jsx';
 import { CubeState } from '../cube/model/CubeState.js';
 import { parseAlgorithm } from '../cube/model/notation.js';
 import { applyMove } from '../cube/engine/applyMove.js';
@@ -18,7 +19,7 @@ import '../styles/tokens.css';
 import './app.css';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver' | 'timer' | 'training'
+  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver' | 'timer' | 'training' | 'scanner'
   const [sharedCubeState, setSharedCubeState] = useState(() => CubeState.createSolved());
   const [pendingSolutionMoves, setPendingSolutionMoves] = useState(null);
 
@@ -129,6 +130,14 @@ export function App() {
             >
               <span>Training</span>
             </button>
+            <button
+              role="tab"
+              aria-selected={activeTab === 'scanner'}
+              className={`nav-tab ${activeTab === 'scanner' ? 'active' : ''}`}
+              onClick={() => setActiveTab('scanner')}
+            >
+              <span>Scanner</span>
+            </button>
           </div>
         </nav>
       </header>
@@ -165,6 +174,9 @@ export function App() {
         )}
         {activeTab === 'training' && (
           <TrainingView />
+        )}
+        {activeTab === 'scanner' && (
+          <ScannerView />
         )}
       </main>
     </div>

@@ -37,8 +37,8 @@ describe('MoveTrainerController', () => {
   });
 
   it('evaluates an incorrect move with mistake details', () => {
-    // Pick an inverse or different move
-    const wrongMove = controller.currentPrompt.expected === 'R' ? "R'" : 'L';
+    // Pick a move guaranteed different from expected
+    const wrongMove = controller.currentPrompt.expected === 'R' ? "R'" : 'R';
     controller.observeMove(wrongMove);
 
     const state = controller.getState();
