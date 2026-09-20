@@ -17,6 +17,7 @@ import {
 } from './curriculum.js';
 import { evaluateCondition } from './lessonValidation.js';
 import { classifyMoveFeedback, FEEDBACK_TYPES } from './feedback.js';
+import { recordLessonProgress } from '../../services/trainingStorage.js';
 
 export { LESSON_PHASES, FEEDBACK_TYPES };
 
@@ -349,6 +350,11 @@ export class TrainingController {
   _completeLesson() {
     this.phase = LESSON_PHASES.COMPLETED;
     this.completedLessonIds.add(this.lesson.id);
+    try {
+      recordLessonProgress(this.lesson.id, true, 100);
+    } catch (e) {
+      // Ignore storage failure in headless mode
+    }
     this.feedback = {
       type: FEEDBACK_TYPES.LESSON_COMPLETE,
       message: `✓ Lesson complete — ${this.lesson.title} is finished.`
