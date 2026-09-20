@@ -176,7 +176,11 @@ export function App() {
           <TrainingView />
         )}
         {activeTab === 'scanner' && (
-          <ScannerView />
+          <ScannerView
+            onLoadIntoSimulator={handleLoadIntoSimulator}
+            onOpenSolver={handleOpenSolver}
+            onOpenEditor={handleOpenEditor}
+          />
         )}
       </main>
     </div>
