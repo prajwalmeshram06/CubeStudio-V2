@@ -180,3 +180,67 @@
 - **Consequences**:
   Curriculum can grow as data. CFOP trainers (Phase 6B) can reuse the same engine, validation helpers, and simulator bridge.
 
+---
+
+## ADR-0011: Trainer Architecture, Authoritative Move Events, Source Isolation & Mistake Intelligence
+- **Date**: 2026-09-20
+- **Status**: Accepted
+- **Context**:
+  Phase 6B extends the training system with Move Trainer, Notation Trainer, and CFOP Algorithm Trainer. A naive subscription to general simulator state (`subscribe`) only provided UI flags (like `lastMoveTime`, `isSolved`) and lacked discrete move event data. Furthermore, applying setup moves (e.g. scrambling the cube to the start of an algorithm case) would erroneously trigger user drill evaluation and skew accuracy metrics.
+- **Decision**:
+  1. **Authoritative Move Event Stream**: Add an explicit `onMove(listener)` event stream to `SimulatorController` emitting `{ move, moveObj, source, timestamp, state }` upon move execution.
+  2. **Source Metadata Tagging**: Tag all move invocations with explicit source metadata:
+     - `'user'`: Manual 3D simulator turns and keyboard shortcuts.
+     - `'setup'`: Automated case preparation moves for algorithm trainers.
+     - `'scramble'`: Timer or manual randomizer turns.
+     - `'algorithm'`: Solution player or automated demonstration playback.
+  3. **Event Filtering in Trainers**: Trainer panels subscribe to `simulatorController.onMove` and strictly filter for `event.source === 'user'`. Setup moves dispatched with `source: 'setup'` are completely isolated from user attempt scoring.
+  4. **Pure Mistake Classification**: `mistakeDetection.js` classifies mistakes into structured types (`CORRECT`, `WRONG_DIRECTION`, `WRONG_FACE`, `INCOMPLETE_DOUBLE`, `DIVERGENCE`, `SKIPPED`) with natural-language hints without mutating cube state or auto-correcting the user.
+  5. **Separate Skip Tracking**: Added `MISTAKE_TYPES.SKIPPED` to allow learners to skip difficult prompts or cases without artificially inflating accuracy or corrupting mistake statistics.
+- **Alternatives Considered**:
+  - Polling `SimulatorController.cubeState`: Rejected because rapid turns could miss intermediate states and lacked direction/intent context.
+  - Intercepting DOM keydown/click events: Rejected because it bypasses 3D cube face clicks and violates the single authoritative simulator pipeline.
+- **Consequences**:
+  Accurate drill evaluation, complete isolation between automated cube setup and learner moves, reliable streak/accuracy metrics, and zero duplicate cube logic.
+
+---
+
+## ADR-0012: Browser-Side Camera Scanner Architecture, Geometric Variance Detection & Quality Machine
+- **Date**: 2026-09-20
+- **Status**: Accepted
+- **Context**:
+  Phase 7A requires scanning a physical Rubik's Cube face via camera in the browser. Large computer vision / ML models (such as YOLO or heavy neural networks) would introduce massive download sizes (50MB+), WebAssembly/shader compilation overhead, and potential browser compatibility issues. Furthermore, running frame-by-frame analysis in React components would trigger 30–60 re-renders per second, causing severe UI lag.
+- **Decision**:
+  1. **Isolated Camera Stream Lifecycle**: `CameraController` isolates `navigator.mediaDevices.getUserMedia`, stream track lifecycle, facingMode switching, and explicit track release on component unmount and tab-switch.
+  2. **Lightweight Geometric Detection**: `FaceDetector` computes row and column perceptual brightness variance across an offscreen canvas to locate high-contrast square regions without any machine learning dependency.
+  3. **Border-Inset Grid Sampling**: `GridDetector` and `ColorSampler` compute 9 logical cells in row-major order with border-inset margins, averaging 5×5 center pixel blocks to avoid contamination from black plastic grid lines.
+  4. **Pure HSL Color Classification**: `ColorClassifier` maps RGB to HSL and uses chromatic hue ranges and saturation/lightness thresholds to classify the 6 canonical cube colors honestly with confidence scores.
+  5. **Offscreen Canvas & RAF Scheduling**: `useScannerEngine` runs the video extraction and overlay rendering via `requestAnimationFrame` on canvas using persistent refs. React state updates are throttled (>= 120ms or on quality change) to ensure zero re-render overhead during 60 FPS live preview.
+  6. **Quality State Machine & Stability**: `ScanQuality` derives state (`SEARCHING`, `DETECTED`, `ALIGNING`, `READY`, `CAPTURED`, `LOW_LIGHT`, `POOR_ALIGNMENT`, `LOW_CONFIDENCE`) and enforces a 12-frame stability threshold (~400ms) before allowing capture.
+- **Alternatives Considered**:
+  - Client-side ML object detection model: Rejected due to heavy payload and latency overhead.
+  - Server-side image streaming: Rejected to maintain client-side processing without continuous backend network bandwidth requirements.
+- **Consequences**:
+  Zero heavy dependencies, fast 60fps canvas preview without React re-render churn, reliable single-face capture payload, and clean separation between camera I/O and reconstruction.
+
+---
+
+## ADR-0013: Six-Face Scanning Session State Machine, Deterministic Reconstruction, and Simulator/Solver Handoff
+- **Date**: 2026-09-20
+- **Status**: Accepted
+- **Context**:
+  Phase 7B builds on Phase 7A's single-face scanner to scan all 6 faces, reconstruct a 54-facelet representation, validate physical solvability, and hand off the state to the 3D Simulator, Solver, and Manual Editor. Duplicating cube representation or writing a second validation engine would violate ADR-0002.
+- **Decision**:
+  1. **Fixed Center Color Identification**: Fixed centers on physical 3×3 cubes (`white -> U`, `red -> R`, `green -> F`, `yellow -> D`, `orange -> L`, `blue -> B`) serve as the single authoritative face identifier.
+  2. **Session State Machine**: `ScannerSessionController` manages the 6-face sequence (`U -> R -> F -> D -> L -> B`), detects duplicate or mismatched center captures, provides single-face review before committing, and supports individual face rescan.
+  3. **Deterministic 54-Facelet Assembler**: `CubeReconstructor` maps 6 faces (each 9 facelets in row-major order) to the canonical Kociemba standard array: `U (0..8)`, `R (9..17)`, `F (18..26)`, `D (27..35)`, `L (36..44)`, `B (45..53)`.
+  4. **Authoritative Validation Reuse**: Reconstructed facelets are evaluated directly by `validation.js` across all 7 physical tiers (symbols, 9-count frequencies, centers, impossible/duplicate cubies, twist parity, flip parity, permutation parity).
+  5. **Diagnostic Guidance**: Identifies over/under-represented colors and suggests specific faces to rescan when validation fails.
+  6. **Direct Handoff**: The validated `CubeState` instance is passed directly to `onLoadIntoSimulator`, `onOpenSolver`, and `onOpenEditor` without intermediate conversion layers.
+- **Alternatives Considered**:
+  - Separate scanner-specific validation rules: Rejected to ensure only 100% physically solvable states reach the simulator/solver.
+  - Forcing full 6-face restart on single error: Rejected in favor of individual face rescan from the 2D Net review.
+- **Consequences**:
+  Deterministic assembly, single authoritative `CubeState` shared across Simulator and Solver, robust error feedback, and zero state duplication.
+
+
