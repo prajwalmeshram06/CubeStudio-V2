@@ -1,8 +1,8 @@
 # Implementation Status — CubeStudio V2
 
 ## Current Status
-- **Current Phase**: Phase 5 — Speedcubing Timer + Solve History + Statistics (COMPLETED)
-- **Current Task**: Phase 5 Verification Gate Reached
+- **Current Phase**: Phase 6A — Beginner Training Foundation + Guided 9-Lesson Curriculum (COMPLETED)
+- **Current Task**: Phase 6A Verification Gate Reached
 - **Blockers**: None
 
 ## Phase Checklist
@@ -12,9 +12,10 @@
 - [x] Phase 3: Backend + Solver (Completed)
 - [x] Phase 4: Solution Player + Hint System (Completed)
 - [x] Phase 5: Speedcubing Timer + Solve History + Statistics (Completed)
+- [x] Phase 6A: Beginner Training Foundation + Guided Curriculum (Completed)
 - [ ] Phase 6: UI/UX Redesign
 - [ ] Phase 7: Camera Scanner
-- [ ] Phase 8: Training / Learning System
+- [ ] Phase 8: Training / Learning System (6A complete; CFOP / OLL / PLL trainers are 6B)
 - [ ] Phase 9: Algorithm Library
 - [ ] Phase 10: Cube Analysis
 - [ ] Phase 11: Solution Optimization
@@ -23,6 +24,23 @@
 - [ ] Phase 14: AI Cube Coach
 - [ ] Phase 15: Sharing / Social
 - [ ] Phase 16: Additional Puzzle Types
+
+## Phase 6A Feature Matrix
+| Feature | Specified Requirement | Status | Notes |
+|---|---|---|---|
+| Curriculum data | 9 beginner lessons with metadata | Completed | Unique IDs, order 1–9, objectives, explanations, hints, steps, completion conditions |
+| Lesson engine | Phase state machine | Completed | `NOT_STARTED → INTRO → EXPLANATION → DEMO → PRACTICE → COMPLETED` in `TrainingController.js` |
+| CubeState authority | No second cube engine | Completed | Validation is pure over `SimulatorController.cubeState`; cubies remain derived |
+| Deterministic starts | Reproducible setups | Completed | `setupAlgorithm` via `applyAlgorithm` on a solved `CubeState` — no RNG |
+| Guided practice | Observe simulator moves | Completed | Face turns go through existing `applyMove` / animation queue |
+| Feedback | Classify without auto-fix | Completed | Correct, wrong direction, wrong piece, incorrect, generic mismatch, step/lesson complete |
+| Hints | Progressive levels | Completed | Conceptual → location → move; later hints only after request |
+| Reset | Step and lesson reset | Completed | `loadState` restores start without remounting the 3D cube |
+| Training UI | Curriculum + lesson view | Completed | Professional glassmorphic cards; locked/unlocked/completed; side panel does not replace the cube |
+| Navigation | Existing App tabs | Completed | Training tab beside Simulator, Editor, Solver, Timer |
+| 3D reuse | Existing simulator | Completed | `SimulatorView variant="training"` + `CubeRenderer` / `MoveAnimator` / `AnimationQueue` |
+| Tests | Lesson data, engine, validation, integration | Completed | 5 new suites; full frontend 223 + backend 22 |
+| Production build | Vite build | Completed | Clean production build in 1.23s |
 
 ## Phase 5 Feature Matrix
 | Feature | Specified Requirement | Status | Notes |

@@ -12,11 +12,29 @@ import { SolutionPlayerController } from '../solver/SolutionPlayerController.js'
 import { SolutionPlayerView } from '../solver/SolutionPlayerView.jsx';
 import './simulator.css';
 
-export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMoves, onOpenEditor, onOpenSolver }) {
+export function SimulatorView({
+  initialCubeState,
+  initialAlgorithm,
+  solutionMoves,
+  onOpenEditor,
+  onOpenSolver,
+  variant = 'full',
+  onControllerReady
+}) {
   const containerRef = useRef(null);
   const controllerRef = useRef(null);
   const sceneRef = useRef(null);
+  const onControllerReadyRef = useRef(onControllerReady);
+  const variantRef = useRef(variant);
   const [solutionPlayer, setSolutionPlayer] = useState(null);
+
+  useEffect(() => {
+    onControllerReadyRef.current = onControllerReady;
+  }, [onControllerReady]);
+
+  useEffect(() => {
+    variantRef.current = variant;
+  }, [variant]);
 
   const [simState, setSimState] = useState({
     isSolved: true,
@@ -75,6 +93,7 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
 
     sceneRef.current = scene;
     controllerRef.current = controller;
+    onControllerReadyRef.current?.(controller);
 
     // ResizeObserver on the container so Three.js camera/renderer perfectly adapts
     const resizeObserver = new ResizeObserver(() => {
@@ -118,18 +137,23 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
         if (e.code === 'Space' || e.key === 'Escape') return;
       }
 
-      // Scramble: Space (only when no solution player)
-      if (e.code === 'Space') {
-        e.preventDefault();
-        controller.scramble(20, false);
-        return;
-      }
+      // Training owns scramble/reset; do not override lesson state from the keyboard.
+      if (variantRef.current === 'training') {
+        // Face turns still apply below.
+      } else {
+        // Scramble: Space (only when no solution player)
+        if (e.code === 'Space') {
+          e.preventDefault();
+          controller.scramble(20, false);
+          return;
+        }
 
-      // Reset: Escape (only when no solution player)
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        controller.reset();
-        return;
+        // Reset: Escape (only when no solution player)
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          controller.reset();
+          return;
+        }
       }
 
       // Cube Face Turns: U, D, L, R, F, B
@@ -171,7 +195,7 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
   };
 
   return (
-    <div className={`simulator-container ${solutionPlayer ? 'has-solution-player' : ''}`}>
+    <div className={`simulator-container ${solutionPlayer ? 'has-solution-player' : ''} ${variant === 'training' ? 'simulator-training' : ''}`}>
       {/* 3D WebGL Canvas Viewport */}
       <div className="simulator-viewport-wrapper">
         <div ref={containerRef} className="viewport-container" />
@@ -179,7 +203,7 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
         {/* Floating Header Bar */}
         <div className="simulator-header">
           <div className="brand-section">
-            <span className="brand-title">CubeStudio V2</span>
+            <span className="brand-title">{variant === 'training' ? 'Training' : 'CubeStudio V2'}</span>
             <span className={`badge ${simState.isSolved ? 'badge-solved' : 'badge-scrambled'}`}>
               {simState.isSolved ? 'Solved' : 'Scrambled'}
             </span>
@@ -201,7 +225,15 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
 
         {/* Keyboard Shortcuts Hint */}
         <div className="keyboard-hint">
-          <span className="kbd">U D L R F B</span> turns <span className="kbd">Shift</span> prime <span className="kbd">Space</span> scramble
+          {variant === 'training' ? (
+            <>
+              <span className="kbd">U D L R F B</span> turns <span className="kbd">Shift</span> prime
+            </>
+          ) : (
+            <>
+              <span className="kbd">U D L R F B</span> turns <span className="kbd">Shift</span> prime <span className="kbd">Space</span> scramble
+            </>
+          )}
         </div>
 
         {/* Speed Control Overlay */}
@@ -247,14 +279,16 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
 
           {/* Action Controls */}
           <div className="action-buttons-bar">
-            <button
-              className="btn"
-              onClick={() => controllerRef.current?.scramble(20)}
-              title="Generate random WCA scramble (Space)"
-            >
-              <Shuffle size={16} />
-              <span>Scramble</span>
-            </button>
+            {variant !== 'training' && (
+              <button
+                className="btn"
+                onClick={() => controllerRef.current?.scramble(20)}
+                title="Generate random WCA scramble (Space)"
+              >
+                <Shuffle size={16} />
+                <span>Scramble</span>
+              </button>
+            )}
 
             <button
               className="btn"
@@ -276,14 +310,16 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
               <span>Redo</span>
             </button>
 
-            <button
-              className="btn"
-              onClick={() => controllerRef.current?.reset()}
-              title="Reset to solved state (Escape)"
-            >
-              <RefreshCw size={16} />
-              <span>Reset</span>
-            </button>
+            {variant !== 'training' && (
+              <button
+                className="btn"
+                onClick={() => controllerRef.current?.reset()}
+                title="Reset to solved state (Escape)"
+              >
+                <RefreshCw size={16} />
+                <span>Reset</span>
+              </button>
+            )}
 
             <button
               className="btn"
@@ -294,7 +330,7 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
               <span>View</span>
             </button>
 
-            {onOpenEditor && (
+            {variant !== 'training' && onOpenEditor && (
               <button
                 className="btn"
                 onClick={() => onOpenEditor(controllerRef.current?.cubeState.clone())}
@@ -305,7 +341,7 @@ export function SimulatorView({ initialCubeState, initialAlgorithm, solutionMove
               </button>
             )}
 
-            {onOpenSolver && (
+            {variant !== 'training' && onOpenSolver && (
               <button
                 className="btn"
                 onClick={() => onOpenSolver(controllerRef.current?.cubeState.clone())}

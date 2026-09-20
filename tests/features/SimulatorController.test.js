@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SimulatorController } from '../../src/features/simulator/SimulatorController.js';
 import { CubeRenderer } from '../../src/cube/rendering/CubeRenderer.js';
+import { CubeState } from '../../src/cube/model/CubeState.js';
 
 describe('SimulatorController', () => {
   it('initializes with solved CubeState and empty history', () => {
@@ -112,5 +113,21 @@ describe('SimulatorController', () => {
 
     expect(controller.getState().isSolved).toBe(true);
     expect(controller.cubeState.isSolved()).toBe(true);
+  });
+
+  it('loadState replaces CubeState, clears history, and keeps the same controller instance', () => {
+    const controller = new SimulatorController({ animationSpeed: 0 });
+    controller.scramble(12, false);
+    const scrambled = controller.cubeState.clone();
+    expect(controller.getState().isSolved).toBe(false);
+
+    const target = CubeState.createSolved();
+    controller.loadState(target);
+
+    expect(controller.cubeState.equals(target)).toBe(true);
+    expect(controller.getState().isSolved).toBe(true);
+    expect(controller.getState().moveCount).toBe(0);
+    expect(controller.getState().lastMove).toBeNull();
+    expect(scrambled.isSolved()).toBe(false);
   });
 });

@@ -159,3 +159,24 @@
 - **Consequences**:
   Ultra-precise, non-drifting speedcubing timer; reliable persistence across reloads; pure testable statistics; and zero interference with the existing simulator and solver architecture.
 
+---
+
+## ADR-0010: Training Lesson Engine on Authoritative CubeState
+- **Date**: 2026-09-19
+- **Status**: Accepted
+- **Context**:
+  Phase 6A adds a beginner 9-lesson curriculum. A second cube permutation engine, renderer, or animation loop would drift from the simulator and violate ADR-0002.
+- **Decision**:
+  1. `TrainingController` owns lesson phase, step index, hints, feedback, and in-session unlock/completion. It does not own cube permutation.
+  2. The learner cube is the existing `SimulatorController.cubeState`. Training evaluates that instance (or a clone for tests) with pure predicates in `lessonValidation.js` that derive cubies from facelets.
+  3. Deterministic starts are `applyAlgorithm(CubeState.createSolved(), setupAlgorithm)`. Practical completion is cubie/facelet conditions (white cross, F2L, yellow cross on D, etc.), not button clicks.
+  4. Demonstration uses `simulatorController.applyAlgorithm` and the existing `AnimationQueue`. Practice observation is disabled until the demo queue is idle and `loadState` restores the start.
+  5. Mistakes are never auto-undone. Feedback classifies wrong direction / wrong piece only when CubeState evidence supports it.
+  6. `SimulatorView` gains a `training` variant and `onControllerReady`; `loadState` updates the cube without changing React keys on each move.
+- **Alternatives Considered**:
+  - Independent training cube model: Rejected; duplicates `CubeState`.
+  - Remounting `SimulatorView` per move or per step: Rejected; drops WebGL context and races animation.
+  - Auto-repairing illegal learner moves: Rejected by the Phase 6A teaching model.
+- **Consequences**:
+  Curriculum can grow as data. CFOP trainers (Phase 6B) can reuse the same engine, validation helpers, and simulator bridge.
+

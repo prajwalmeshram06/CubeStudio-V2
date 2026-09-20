@@ -1,6 +1,6 @@
 /**
  * CubeStudio V2 - Main React Application
- * Provides navigation between 3D Simulator, Manual Editor, Solver, and Speedcubing Timer.
+ * Provides navigation between 3D Simulator, Manual Editor, Solver, Speedcubing Timer, and Training.
  */
 
 import React, { useState } from 'react';
@@ -8,13 +8,14 @@ import { SimulatorView } from '../features/simulator/SimulatorView.jsx';
 import { EditorView } from '../features/editor/EditorView.jsx';
 import { SolverView } from '../features/solver/SolverView.jsx';
 import { TimerView } from '../features/timer/TimerView.jsx';
+import { TrainingView } from '../features/training/TrainingView.jsx';
 import { CubeState } from '../cube/model/CubeState.js';
 import { parseAlgorithm } from '../cube/model/notation.js';
 import { applyMove } from '../cube/engine/applyMove.js';
 import './app.css';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver' | 'timer'
+  const [activeTab, setActiveTab] = useState('simulator'); // 'simulator' | 'editor' | 'solver' | 'timer' | 'training'
   const [sharedCubeState, setSharedCubeState] = useState(() => CubeState.createSolved());
   const [pendingSolutionMoves, setPendingSolutionMoves] = useState(null);
 
@@ -96,6 +97,12 @@ export function App() {
         >
           Timer
         </button>
+        <button
+          className={`nav-tab ${activeTab === 'training' ? 'active' : ''}`}
+          onClick={() => setActiveTab('training')}
+        >
+          Training
+        </button>
       </nav>
 
       {/* Main Content Area */}
@@ -127,6 +134,9 @@ export function App() {
             onOpenSimulator={handleOpenSimulatorWithScramble}
             onOpenSolver={handleOpenSolver}
           />
+        )}
+        {activeTab === 'training' && (
+          <TrainingView />
         )}
       </main>
     </div>

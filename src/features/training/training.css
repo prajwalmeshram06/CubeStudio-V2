@@ -1,0 +1,239 @@
+/* CubeStudio V2 - Training / Learn */
+
+.training-shell {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 88px 24px 40px;
+  color: #e2e8f0;
+}
+
+.training-hero h1 {
+  margin: 8px 0 10px;
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+  color: #f8fafc;
+}
+
+.training-hero p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.training-kicker,
+.training-lesson-kicker,
+.training-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #93c5fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.training-progress-meta {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.training-curriculum {
+  list-style: none;
+  padding: 0;
+  margin: 28px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.training-lesson-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.75);
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.training-lesson-card:hover:not(:disabled) {
+  border-color: rgba(37, 99, 235, 0.6);
+}
+
+.training-lesson-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.training-lesson-index {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #93c5fd;
+  min-width: 3.5rem;
+}
+
+.training-lesson-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.training-lesson-copy strong {
+  font-size: 0.98rem;
+}
+
+.training-lesson-copy span {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.training-lesson-card.is-completed .training-lesson-index {
+  color: #4ade80;
+}
+
+.training-lesson-layout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+.training-cube-pane {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.training-panel {
+  width: 360px;
+  max-width: 42%;
+  overflow-y: auto;
+  padding: 80px 20px 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.92);
+  color: #e2e8f0;
+}
+
+.training-panel h2 {
+  margin: 4px 0 8px;
+  font-size: 1.35rem;
+  color: #f8fafc;
+}
+
+.training-section {
+  margin-top: 18px;
+}
+
+.training-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.training-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.training-alg {
+  margin-top: 8px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem !important;
+  color: #93c5fd !important;
+}
+
+.training-feedback {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.training-feedback.is-correct,
+.training-feedback.is-step_complete,
+.training-feedback.is-lesson_complete {
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #86efac;
+}
+
+.training-feedback.is-wrong_direction,
+.training-feedback.is-wrong_piece,
+.training-feedback.is-incorrect {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+}
+
+.training-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: transparent;
+  border: 0;
+  color: #93c5fd;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.training-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.training-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.training-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.simulator-training .simulator-header {
+  right: auto;
+}
+
+@media (max-width: 900px) {
+  .training-lesson-layout {
+    flex-direction: column;
+  }
+
+  .training-panel {
+    width: 100%;
+    max-width: none;
+    height: 42%;
+    padding-top: 16px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}

@@ -3,12 +3,12 @@
 ## Overview
 - **Frontend Runner**: Vitest v2.1.9
 - **Backend Runner**: Pytest v9.1.1 (Python 3.14.0)
-- **Last Run**: 2026-09-19 (Phase 5 Speedcubing Timer + Statistics)
-- **Frontend Suites**: 21 (196 tests, 100% passing)
+- **Last Run**: 2026-09-19 (Phase 6A Beginner Training Foundation)
+- **Frontend Suites**: 26 (223 tests, 100% passing)
 - **Backend Suites**: 1 (22 tests, 100% passing)
-- **Total Tests**: 218 (100% passing)
+- **Total Tests**: 245 (100% passing)
 - **Failing Tests**: 0
-- **Coverage**: 100% across core domain, engine, renderer presentation, simulator controller, editor controller, solver service, solution player, speedcubing timer, statistics, persistence, and Flask REST API
+- **Coverage**: 100% across core domain, engine, renderer presentation, simulator controller, editor controller, solver service, solution player, speedcubing timer, statistics, persistence, beginner training curriculum/engine/validation, and Flask REST API
 
 ## Frontend Test Suites (Vitest)
 | Suite | Tests | Status | Scope |
@@ -23,7 +23,7 @@
 | `properties.test.js` | 3 | Passed | 50 random scrambles inverted ($Seq \cdot Seq^{-1} = I$), 50 serialization roundtrips, 50 scrambled validity invariants |
 | `CubeRenderer.test.js` | 6 | Passed | 26 cubies created, 9 per face identified, materials synced with CubeState, position resets, disposal |
 | `AnimationQueue.test.js` | 3 | Passed | FIFO sequential processing, enqueueAll, queue clear/flush, busy state |
-| `SimulatorController.test.js` | 7 | Passed | Initial state, move dispatch, undo/redo, scramble, reset, algorithm application, renderer sync |
+| `SimulatorController.test.js` | 8 | Passed | Initial state, move dispatch, undo/redo, scramble, reset, algorithm application, renderer sync, `loadState` |
 | `EditorController.test.js` | 13 | Passed | Initial solved state, brush selection, sticker painting, center lock, cycle colors, reset, clear, undo/redo, parity detection, import/export roundtrips, state loading, simulator readiness |
 | `solverApi.test.js` | 8 | Passed | Health check, cube validation request, solve request, network error handling, non-JSON parse errors, HTTP error codes, unsolvable cube handling |
 | `SolverController.test.js` | 7 | Passed | Initialization with CubeState, local validation before network call, illegal cube rejection, cube reference updates, solve execution and move parsing into Move instances, already-solved handling, health check delegation |
@@ -34,6 +34,11 @@
 | `statistics.test.js` | 24 | Passed | Effective time calculation, WCA formatting, Ao5/Ao12/Ao50/Ao100 trimmed averaging, DNF rules (>1 DNF in Ao5/12 = DNF), best single, session mean, improvement tracking, edge cases |
 | `solveStorage.test.js` | 12 | Passed | LocalStorage abstraction, solve record validation & normalization, CRUD operations, corrupted JSON recovery, partial corruption filtering, JSON export, RFC-compliant CSV export with quoting |
 | `TimerView.test.jsx` | 3 | Passed | TimerView initial IDLE state with scramble and stats, HistoryView empty state, HistoryView populated table with penalties, dates, scrambles, and export buttons |
+| `curriculum.test.js` | 3 | Passed | Nine beginner lessons, unique IDs, required metadata, deterministic start states |
+| `lessonValidation.test.js` | 4 | Passed | Start incomplete / demo complete for practical lessons, partial white-cross, reset recreates start |
+| `TrainingController.test.js` | 9 | Passed | Phase transitions, locks, hints, correct/wrong-direction/incorrect moves without auto-fix, reset, completion unlock |
+| `TrainingSimulatorIntegration.test.js` | 4 | Passed | Moves through SimulatorController, CubeState authority, loadState reset, simulator still works after dispose |
+| `TrainingView.test.jsx` | 1 | Passed | Curriculum screen with nine lessons and progress |
 
 ## Backend Test Suites (Pytest)
 | Suite | Tests | Status | Scope |
@@ -48,3 +53,5 @@
 - Backend errors guaranteed to return standardized JSON error objects without leaking Python execution stack traces or internal exception details.
 - Solution Player strictly disallows forward/backward steps when SimulatorController queue is busy, eliminating animation race conditions.
 - Inverse moves during backward stepping utilize `Move.inverse()` without recreating CubeState or re-running full permutation walks.
+- Training demo playback is isolated from practice observation so demonstration algorithms cannot complete a lesson or desynchronize CubeState.
+- `SimulatorController.loadState` is the only training reset path; React does not remount the simulator on ordinary moves.

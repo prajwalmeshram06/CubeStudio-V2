@@ -181,6 +181,31 @@ export class SimulatorController {
   }
 
   /**
+   * Loads an authoritative CubeState into the simulator without remounting the renderer.
+   * History is cleared to the loaded state. Used by training resets and lesson entry.
+   * @param {import('../../cube/model/CubeState.js').CubeState} cubeState
+   */
+  loadState(cubeState) {
+    if (!(cubeState instanceof CubeState)) {
+      throw new Error('loadState requires an instance of CubeState');
+    }
+
+    this.queue.clear();
+    this.animator.cancel();
+
+    this.cubeState = cubeState.clone();
+    this.history.clear(this.cubeState);
+    this._lastMove = null;
+
+    if (this.renderer) {
+      this.renderer.resetPositions();
+      this.renderer.syncWithState(this.cubeState);
+    }
+
+    this._notifyListeners();
+  }
+
+  /**
    * Resets the cube to the solved state.
    */
   reset() {
