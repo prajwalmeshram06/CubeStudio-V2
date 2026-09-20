@@ -1,14 +1,28 @@
 /**
- * CubeStudio V2 - Timer View
+ * CubeStudio V2 - Speedcubing Timer View
  * Presentation component providing WCA-style speedcubing timer, inspection countdown,
  * keyboard/spacebar controls, post-solve penalties, and live statistics.
+ * Governed by DESIGN.md & Stitch Visual Reference (media_1789896645226.png).
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { RefreshCw, Copy, Check, Save, RotateCcw, ExternalLink, Wand2, History as HistoryIcon, Clock } from 'lucide-react';
+import {
+  RefreshCw,
+  Copy,
+  Check,
+  RotateCcw,
+  ExternalLink,
+  Wand2,
+  History as HistoryIcon,
+  Clock,
+  Sparkles,
+  Trophy,
+  Trash2,
+  TrendingDown
+} from 'lucide-react';
 import { TimerController, TIMER_STATUS } from './TimerController.js';
 import { formatTime, calculateStatistics } from './statistics.js';
-import { getSolves, saveSolve, updateSolve } from '../../services/solveStorage.js';
+import { getSolves, saveSolve, updateSolve, deleteSolve } from '../../services/solveStorage.js';
 import { HistoryView } from './HistoryView.jsx';
 import './timer.css';
 
@@ -40,28 +54,17 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
     };
   }, [controller]);
 
-  // Sync saved solve records whenever a solve transitions to SAVED
-  const handleSaveCurrentSolve = useCallback(() => {
-    if (timerState.status === TIMER_STATUS.STOPPED) {
-      const record = controller.save();
-      if (record) {
-        setSolves(getSolves());
-      }
-    }
-  }, [controller, timerState.status]);
-
   // ── Keyboard / Spacebar Controls ─────────────────────────────
   const isSpaceDownRef = useRef(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is inside an input, textarea, select, or editable element
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable) {
         return;
       }
 
       if (e.code === 'Space') {
-        e.preventDefault(); // Prevent browser scrolling
+        e.preventDefault();
 
         if (isSpaceDownRef.current) return;
         isSpaceDownRef.current = true;
@@ -69,9 +72,7 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
         const currentStatus = controller.status;
 
         if (currentStatus === TIMER_STATUS.RUNNING) {
-          // Any space tap while running immediately stops the solve
           controller.stopSolve();
-          // Auto-save on stop for convenient seamless speedcubing sessions
           const record = controller.save();
           if (record) {
             setSolves(getSolves());
@@ -85,11 +86,9 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
         } else if (currentStatus === TIMER_STATUS.INSPECTION) {
           controller.setReady();
         } else if (currentStatus === TIMER_STATUS.STOPPED || currentStatus === TIMER_STATUS.SAVED) {
-          // Space on stopped solve resets to idle with new scramble
           controller.reset(true);
         }
       } else if (controller.status === TIMER_STATUS.RUNNING) {
-        // Any key stops the timer during a solve
         e.preventDefault();
         controller.stopSolve();
         const record = controller.save();
@@ -171,63 +170,41 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
     }
   };
 
+  const handleDeleteCurrent = () => {
+    if (timerState.solveId) {
+      const updated = deleteSolve(timerState.solveId);
+      setSolves(updated);
+      controller.reset(true);
+    }
+  };
+
   const stats = calculateStatistics(solves);
+  const dnfCount = solves.filter((s) => s.penalty === 'DNF').length;
 
   return (
-    <div className="timer-container">
-      {/* Top Scramble & Sub-Tab Bar */}
-      <div className="timer-header">
-        <div className="timer-scramble-card">
-          <div className="timer-scramble-text" title="Current solve scramble">
-            {timerState.scramble}
-          </div>
-          <div className="timer-scramble-actions">
-            <button
-              className="timer-icon-btn"
-              onClick={handleCopyScramble}
-              title="Copy scramble to clipboard"
-            >
-              {copiedScramble ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
-            </button>
-            <button
-              className="timer-icon-btn"
-              onClick={() => controller.newScramble()}
-              disabled={timerState.status === TIMER_STATUS.RUNNING}
-              title="Generate new scramble"
-            >
-              <RefreshCw size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="timer-settings-bar">
-          <label className="timer-toggle-label">
-            <input
-              type="checkbox"
-              className="timer-toggle-checkbox"
-              checked={timerState.inspectionEnabled}
-              onChange={(e) => controller.setInspectionEnabled(e.target.checked)}
-              disabled={timerState.status === TIMER_STATUS.RUNNING}
-            />
-            <span>15s WCA Inspection</span>
-          </label>
-
-          <div className="timer-view-tabs">
-            <button
-              className={`timer-tab-btn ${activeSubTab === 'timer' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('timer')}
-            >
-              <Clock size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: -2 }} />
-              Timer
-            </button>
-            <button
-              className={`timer-tab-btn ${activeSubTab === 'history' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('history')}
-            >
-              <HistoryIcon size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: -2 }} />
-              History ({solves.length})
-            </button>
-          </div>
+    <div className="timer-page-container">
+      {/* Sub-Tab Switcher (Stitch Reference) */}
+      <div className="timer-nav-header">
+        <div className="timer-switcher-pill" role="tablist">
+          <button
+            role="tab"
+            aria-selected={activeSubTab === 'timer'}
+            className={`timer-switcher-btn ${activeSubTab === 'timer' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('timer')}
+          >
+            <Clock size={13} />
+            <span>Timer</span>
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeSubTab === 'history'}
+            className={`timer-switcher-btn ${activeSubTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('history')}
+          >
+            <HistoryIcon size={13} />
+            <span>History &amp; Stats</span>
+            <span className="history-pill-count">{solves.length} solves</span>
+          </button>
         </div>
       </div>
 
@@ -239,8 +216,62 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
           onOpenSolver={onOpenSolver}
         />
       ) : (
-        <>
-          {/* Main Large Timer Area */}
+        <div className="timer-container">
+          {/* Top WCA Scramble Card (Stitch Reference) */}
+          <div className="timer-scramble-card">
+            <div className="scramble-card-top-row">
+              <div className="scramble-title-group">
+                <span className="scramble-live-dot" />
+                <span className="scramble-kicker">WCA OFFICIAL 3X3X3 SCRAMBLE</span>
+                <span className="scramble-index-badge">#{solves.length + 1}</span>
+              </div>
+
+              <label className="inspection-switch-label">
+                <span>15s WCA Inspection: <strong>{timerState.inspectionEnabled ? 'Enabled' : 'Disabled'}</strong></span>
+                <input
+                  type="checkbox"
+                  className="inspection-switch-input"
+                  checked={timerState.inspectionEnabled}
+                  onChange={(e) => controller.setInspectionEnabled(e.target.checked)}
+                  disabled={timerState.status === TIMER_STATUS.RUNNING}
+                />
+              </label>
+            </div>
+
+            {/* Large Monospace Scramble String */}
+            <div className="timer-scramble-text" title="Current solve scramble">
+              {timerState.scramble}
+            </div>
+
+            <div className="scramble-card-bottom-row">
+              <span className="scramble-hint-text">
+                Inspection warning at 8s &amp; 12s voice cue
+              </span>
+
+              <div className="scramble-actions-group">
+                <button
+                  className="btn-scramble-action"
+                  onClick={handleCopyScramble}
+                  title="Copy scramble to clipboard"
+                >
+                  {copiedScramble ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                  <span>{copiedScramble ? 'Copied' : 'Copy Scramble'}</span>
+                </button>
+
+                <button
+                  className="btn-scramble-action"
+                  onClick={() => controller.newScramble()}
+                  disabled={timerState.status === TIMER_STATUS.RUNNING}
+                  title="Generate new scramble"
+                >
+                  <RefreshCw size={13} />
+                  <span>Generate New Scramble</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Huge Digital Timer Display (Stitch Reference) */}
           <div
             className="timer-display-area"
             onMouseDown={handleDisplayMouseDown}
@@ -248,20 +279,26 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
             onTouchStart={handleDisplayMouseDown}
             onTouchEnd={handleDisplayMouseUp}
           >
-            {/* Status Badge */}
+            {/* Status Pill */}
             {timerState.status === TIMER_STATUS.INSPECTION && (
-              <span className={`timer-status-badge ${timerState.inspectionWarning ? 'status--warning' : 'status--inspection'}`}>
-                {timerState.inspectionWarning ? `Inspection (${timerState.inspectionWarning})` : 'Inspection'}
+              <span className={`timer-status-pill ${timerState.inspectionWarning ? 'warning' : 'inspection'}`}>
+                ● INSPECTION ({timerState.inspectionRemainingSec}s remaining)
               </span>
             )}
             {timerState.status === TIMER_STATUS.READY && (
-              <span className="timer-status-badge status--ready">READY</span>
+              <span className="timer-status-pill ready">
+                ● READY • HOLD SPACEBAR TO ARM
+              </span>
             )}
             {timerState.status === TIMER_STATUS.IDLE && (
-              <span className="timer-status-badge status--idle">Press Space or Tap to Begin</span>
+              <span className="timer-status-pill idle">
+                Press Space or Tap to Begin
+              </span>
             )}
             {(timerState.status === TIMER_STATUS.STOPPED || timerState.status === TIMER_STATUS.SAVED) && (
-              <span className="timer-status-badge status--saved">Solve Complete</span>
+              <span className="timer-status-pill saved">
+                ● SOLVE COMPLETE
+              </span>
             )}
 
             {/* Digits Display */}
@@ -285,7 +322,7 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
               {timerState.status === TIMER_STATUS.INSPECTION
                 ? timerState.inspectionRemainingSec
                 : timerState.status === TIMER_STATUS.READY
-                ? '0.000'
+                ? '00:00.00'
                 : formatTime(
                     timerState.status === TIMER_STATUS.RUNNING
                       ? timerState.elapsedMs
@@ -297,32 +334,39 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
             {/* Interaction Hint */}
             <div className="timer-interaction-hint">
               {timerState.status === TIMER_STATUS.RUNNING
-                ? 'Press any key or tap screen to stop'
+                ? 'Press any key or tap screen to stop timing.'
                 : timerState.status === TIMER_STATUS.INSPECTION
-                ? 'Hold Spacebar or tap to get ready'
+                ? 'Hold Space or press & hold screen until green, then release to start timing.'
                 : timerState.status === TIMER_STATUS.READY
-                ? 'Release Spacebar to start solving!'
+                ? 'Release Spacebar to start timing!'
                 : timerState.status === TIMER_STATUS.IDLE
                 ? timerState.inspectionEnabled
-                  ? 'Hold Spacebar to inspect cube'
-                  : 'Hold Spacebar to get ready'
+                  ? 'Hold Space or press & hold screen until green, then release to start timing. Press any key to stop.'
+                  : 'Hold Spacebar to get ready.'
                 : 'Spacebar: next scramble  •  Esc: reset'}
             </div>
           </div>
 
-          {/* Post-Solve Action Controls */}
+          {/* Post-Solve Action Controls (Stitch Reference) */}
           {(timerState.status === TIMER_STATUS.STOPPED || timerState.status === TIMER_STATUS.SAVED) && (
-            <div className="timer-post-actions">
-              <div className="timer-action-group">
+            <div className="timer-post-actions-panel">
+              <div className="penalty-buttons-group">
                 <button
-                  className={`btn-penalty plus-two ${timerState.penalty === '+2' ? 'active' : ''}`}
+                  className={`btn-penalty-pill ${timerState.penalty === null ? 'active-ok' : ''}`}
+                  onClick={() => handleTogglePenalty(null)}
+                  title="No penalty (OK)"
+                >
+                  OK
+                </button>
+                <button
+                  className={`btn-penalty-pill plus-two ${timerState.penalty === '+2' ? 'active' : ''}`}
                   onClick={() => handleTogglePenalty('+2')}
                   title="Apply +2 second penalty"
                 >
-                  +2
+                  +2 sec
                 </button>
                 <button
-                  className={`btn-penalty ${timerState.penalty === 'DNF' ? 'active' : ''}`}
+                  className={`btn-penalty-pill dnf ${timerState.penalty === 'DNF' ? 'active' : ''}`}
                   onClick={() => handleTogglePenalty('DNF')}
                   title="Mark solve as DNF (Did Not Finish)"
                 >
@@ -330,72 +374,114 @@ export function TimerView({ onOpenSimulator, onOpenSolver }) {
                 </button>
               </div>
 
-              <div className="timer-action-group">
+              <div className="post-nav-buttons-group">
                 <button
-                  className="btn-timer-primary"
+                  className="btn-timer-cta-primary"
                   onClick={() => controller.reset(true)}
-                  title="Start next solve with new scramble"
+                  title="Start next solve with fresh scramble (Space)"
                 >
-                  <RotateCcw size={15} />
-                  <span>Next Scramble</span>
+                  <RotateCcw size={14} />
+                  <span>Next Scramble <span className="btn-kbd-chip">Space</span></span>
                 </button>
 
                 {onOpenSimulator && (
                   <button
-                    className="btn-timer-secondary"
+                    className="btn-timer-cta-secondary"
                     onClick={() => onOpenSimulator(timerState.scramble)}
                     title="Load this scramble in 3D Simulator"
                   >
-                    <ExternalLink size={15} />
-                    <span>3D View</span>
+                    <ExternalLink size={14} />
+                    <span>Open in 3D View</span>
                   </button>
                 )}
 
                 {onOpenSolver && (
                   <button
-                    className="btn-timer-secondary"
+                    className="btn-timer-cta-secondary"
                     onClick={() => onOpenSolver(timerState.scramble)}
                     title="Solve this scramble with Kociemba algorithm"
                   >
-                    <Wand2 size={15} />
-                    <span>Solve</span>
+                    <Wand2 size={14} />
+                    <span>Send to Solver</span>
+                  </button>
+                )}
+
+                {timerState.solveId && (
+                  <button
+                    className="btn-timer-cta-danger"
+                    onClick={handleDeleteCurrent}
+                    title="Delete this recorded solve"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
             </div>
           )}
 
-          {/* Quick Stats Panel */}
-          <div className="timer-quick-stats">
-            <div className="stat-pill">
-              <span className="stat-label">Best</span>
-              <span className="stat-value best">{formatTime(stats.bestSingleTime)}</span>
+          {/* Bottom Technical Quick Stats Strip (Stitch Reference) */}
+          <div className="timer-quick-stats-strip">
+            {/* Best Single */}
+            <div className="timer-stat-card">
+              <div className="stat-card-top">
+                <span className="stat-card-label">Best Single</span>
+                {stats.bestSingleTime && <span className="stat-card-pb-badge"><Trophy size={10} /> PB</span>}
+              </div>
+              <div className="stat-card-time best">
+                {formatTime(stats.bestSingleTime)}
+              </div>
             </div>
-            <div className="stat-pill">
-              <span className="stat-label">Ao5</span>
-              <span className="stat-value highlight">
+
+            {/* Current Ao5 */}
+            <div className="timer-stat-card">
+              <div className="stat-card-top">
+                <span className="stat-card-label">Ao5</span>
+                {stats.improvement.percentage !== null && stats.improvement.improved && (
+                  <span className="stat-card-trend-badge"><TrendingDown size={10} /> -0.34</span>
+                )}
+              </div>
+              <div className="stat-card-time highlight">
                 {stats.ao5 === Infinity ? 'DNF' : formatTime(stats.ao5)}
-              </span>
+              </div>
             </div>
-            <div className="stat-pill">
-              <span className="stat-label">Ao12</span>
-              <span className="stat-value highlight">
+
+            {/* Current Ao12 */}
+            <div className="timer-stat-card">
+              <div className="stat-card-top">
+                <span className="stat-card-label">Ao12</span>
+                <span className="stat-card-sub-tag">Rolling</span>
+              </div>
+              <div className="stat-card-time highlight">
                 {stats.ao12 === Infinity ? 'DNF' : formatTime(stats.ao12)}
-              </span>
+              </div>
             </div>
-            <div className="stat-pill">
-              <span className="stat-label">Session Mean</span>
-              <span className="stat-value">
+
+            {/* Session Mean */}
+            <div className="timer-stat-card">
+              <div className="stat-card-top">
+                <span className="stat-card-label">Session Mean</span>
+                <span className="stat-card-sub-tag">All Solves</span>
+              </div>
+              <div className="stat-card-time">
                 {stats.sessionAverage === Infinity ? 'DNF' : formatTime(stats.sessionAverage)}
-              </span>
+              </div>
             </div>
-            <div className="stat-pill">
-              <span className="stat-label">Solves</span>
-              <span className="stat-value">{stats.count}</span>
+
+            {/* Solves Count */}
+            <div className="timer-stat-card">
+              <div className="stat-card-top">
+                <span className="stat-card-label">Solves</span>
+                {dnfCount > 0 && <span className="stat-card-dnf-count">{dnfCount} DNF</span>}
+              </div>
+              <div className="stat-card-time">
+                {stats.count} <span className="stat-card-count-denom">/ {stats.count}</span>
+              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
 }
+
+export default TimerView;

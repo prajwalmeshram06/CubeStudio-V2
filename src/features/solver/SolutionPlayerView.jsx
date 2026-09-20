@@ -1,17 +1,30 @@
 /**
  * SolutionPlayerView.jsx — React Presentation Component for Solution Playback.
+ * Governed by DESIGN.md & Stitch Visual Reference (media_1789896645222.png).
  *
  * Displays:
- *  - Move track with completed, current, and upcoming highlighting
- *  - Auto-scrolling active move chip
- *  - Progress count and progress bar
- *  - Hint panel with natural-language turn directions
- *  - Playback controls: Restart, Previous, Play/Pause, Next
- *  - Playback speed pills (0.5x, 1x, 1.5x, 2x)
+ *  - Step counter + completion badge + live state tag
+ *  - Full progress bar
+ *  - Algorithm scrubbing rail with clickable chips and completed checkmarks
+ *  - Target instruction card with natural-language turn description and next-up preview
+ *  - Playback controls: Restart, Prev, Play/Pause, Next
+ *  - Speed pills (0.5x, 1x, 1.5x, 2x) and keyboard shortcuts hint
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Lightbulb, CheckCircle2, X } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+  Lightbulb,
+  CheckCircle2,
+  Check,
+  X,
+  ExternalLink,
+  Compass
+} from 'lucide-react';
 import './solutionPlayer.css';
 
 const SPEED_PRESETS = [
@@ -25,10 +38,16 @@ const SPEED_PRESETS = [
  * @param {{
  *   controller: import('./SolutionPlayerController.js').SolutionPlayerController,
  *   compact?: boolean,
- *   onClose?: () => void
+ *   onClose?: () => void,
+ *   onOpenInSimulator?: () => void
  * }} props
  */
-export function SolutionPlayerView({ controller, compact = false, onClose }) {
+export function SolutionPlayerView({
+  controller,
+  compact = false,
+  onClose,
+  onOpenInSimulator
+}) {
   const [playerState, setPlayerState] = useState(() => controller.getState());
   const activeChipRef = useRef(null);
   const trackRef = useRef(null);
@@ -46,10 +65,6 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
   }, [controller]);
 
   // ── Auto-scroll active move chip into view (scoped to track) ─
-  // Never call scrollIntoView — that can propagate up the ancestor chain
-  // and cause visible viewport repaints / blink during autoplay.
-  // Instead, compute the chip offset relative to the track and call
-  // scrollBy only on the track element itself.
   useEffect(() => {
     const track = trackRef.current;
     const chip  = activeChipRef.current;
@@ -58,7 +73,6 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
     const trackRect = track.getBoundingClientRect();
     const chipRect  = chip.getBoundingClientRect();
 
-    // Distance needed to bring chip to horizontal center of track
     const chipCenter  = chipRect.left + chipRect.width / 2;
     const trackCenter = trackRect.left + trackRect.width / 2;
     const delta = chipCenter - trackCenter;
@@ -108,10 +122,9 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
     [controller]
   );
 
-  // ── Solution Player Keyboard Shortcuts ───────────────────────
+  // ── Keyboard Shortcuts ───────────────────────────────────────
   useEffect(() => {
     const handlePlayerKeyDown = (e) => {
-      // Ignore when focused inside form inputs
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable) {
         return;
       }
@@ -131,8 +144,6 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
           controller.play();
         }
       } else if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-        // Only trigger restart when 'r' is pressed without modifiers (which could be cube face R)
-        // Check if user is trying to restart
         e.preventDefault();
         controller.restart();
       } else if (e.key === 'Escape') {
@@ -154,7 +165,7 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
     return (
       <div className="solution-player">
         <div className="solution-empty-state">
-          <CheckCircle2 size={32} />
+          <CheckCircle2 size={28} />
           <span>Already Solved — No moves required.</span>
           {onClose && (
             <button
@@ -163,7 +174,7 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
               aria-label="Close solution player"
               title="Close solution player (Escape)"
             >
-              <X size={16} />
+              <X size={15} />
             </button>
           )}
         </div>
@@ -171,43 +182,61 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
     );
   }
 
-  // ── Render Normal Solution Player ────────────────────────────
+  // Next move preview
+  const nextMoveUpcoming = moves[currentIndex + 1] ? moves[currentIndex + 1].notation : null;
+
   return (
-    <div className={`solution-player ${compact ? 'solution-player--compact' : ''}`} role="region" aria-label="Solution Player">
-      {/* Header & Step Counter */}
+    <div
+      className={`solution-player ${compact ? 'solution-player--compact' : ''}`}
+      role="region"
+      aria-label="Solution Player"
+    >
+      {/* Header & Status (Stitch Reference) */}
       <div className="solution-player-header">
         <div className="solution-header-left">
           <div className="solution-step-counter">
-            <span>
-              Move {progress.current} of {progress.total}
-            </span>
+            <span>Move {progress.current} of {progress.total}</span>
             <span className="solution-percent-badge">{progress.percent}%</span>
           </div>
 
           <span className={`solution-status-tag ${status}`}>
+            <span className={`status-tag-dot ${status}`} />
             {status === 'playing'
-              ? '▶ Playing'
+              ? 'Playing'
               : status === 'paused'
-              ? '⏸ Paused'
+              ? 'Paused'
               : status === 'completed'
-              ? '✓ Solved'
+              ? 'Solved'
               : 'Ready'}
           </span>
         </div>
 
-        {onClose && (
-          <button
-            className="solution-close-btn"
-            onClick={onClose}
-            aria-label="Close solution player"
-            title="Close solution player (Escape)"
-          >
-            <X size={16} />
-          </button>
-        )}
+        <div className="solution-header-right">
+          {onOpenInSimulator && !compact && (
+            <button
+              className="solution-open-sim-btn"
+              onClick={onOpenInSimulator}
+              title="Open and animate solution in 3D Simulator"
+            >
+              <ExternalLink size={13} />
+              <span>Open Solution in 3D Simulator</span>
+            </button>
+          )}
+
+          {onClose && (
+            <button
+              className="solution-close-btn"
+              onClick={onClose}
+              aria-label="Close solution player"
+              title="Close solution player (Escape)"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress Bar Track */}
       <div
         className="solution-progress-track"
         role="progressbar"
@@ -221,9 +250,19 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
         />
       </div>
 
-      {/* Horizontal Move Rail */}
-      <div className="solution-move-track-container">
-        <div className="solution-move-track" ref={trackRef} tabIndex={0} aria-label="Solution moves sequence">
+      {/* Algorithm Scrubbing Rail (Stitch Reference) */}
+      <div className="solution-rail-wrapper">
+        <div className="solution-rail-header">
+          <span className="solution-rail-label">ALGORITHM SCRUBBING RAIL</span>
+          <span className="solution-rail-hint">Click any chip to jump to step</span>
+        </div>
+
+        <div
+          className="solution-move-track"
+          ref={trackRef}
+          tabIndex={0}
+          aria-label="Solution moves sequence"
+        >
           {moves.map((move, idx) => {
             const isFinished = idx < currentIndex;
             const isCurrent = idx === currentIndex;
@@ -251,38 +290,41 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
                 }}
                 title={`Jump to Move ${idx + 1}: ${move.notation}`}
               >
-                <span className="chip-num">{idx + 1}</span>
-                <span>{move.notation}</span>
+                <span className="chip-notation">{move.notation}</span>
+                {isFinished && <Check size={10} className="chip-check-icon" />}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Hint Card */}
+      {/* Target Instruction Card (Stitch Reference) */}
       <div className={`solution-hint-card ${isCompleted ? 'completed' : ''}`}>
         <div className="solution-hint-left">
           <div className="solution-hint-icon">
-            {isCompleted ? <CheckCircle2 size={20} /> : <Lightbulb size={20} />}
+            {isCompleted ? <CheckCircle2 size={18} /> : <Compass size={18} />}
           </div>
           <div className="solution-hint-body">
             <span className="solution-hint-label">
-              {isCompleted ? 'Solution Complete' : 'Next Move'}
+              {isCompleted ? 'Solution Complete' : 'Target Instruction / Next Move'}
             </span>
             <span className="solution-hint-desc">
               {isCompleted
                 ? 'Cube is solved. No remaining moves.'
-                : nextHint.description}
+                : nextHint.description || `Turn face ${nextHint.notation}`}
             </span>
           </div>
         </div>
 
-        {!isCompleted && nextHint.notation && (
-          <span className="solution-hint-badge">{nextHint.notation}</span>
+        {!isCompleted && nextMoveUpcoming && (
+          <div className="solution-next-preview">
+            <span className="next-preview-label">NEXT UP:</span>
+            <span className="next-preview-badge">{nextMoveUpcoming}</span>
+          </div>
         )}
       </div>
 
-      {/* Playback Controls Bar */}
+      {/* Playback Controls Bar (Stitch Reference) */}
       <div className="solution-controls-bar">
         <div className="solution-main-buttons">
           {/* Restart */}
@@ -293,20 +335,18 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
             aria-label="Restart solution from beginning"
             title="Restart solution (rewind to 0)"
           >
-            <RotateCcw size={16} />
-            <span>Restart</span>
+            <RotateCcw size={14} />
           </button>
 
-          {/* Previous / Undo Step */}
+          {/* Previous Step */}
           <button
             className="player-btn"
             onClick={handleStepBackward}
             disabled={!canStepBackward}
             aria-label="Step backward to previous move"
-            title="Step backward (undo)"
+            title="Step backward (Left Arrow)"
           >
-            <SkipBack size={16} />
-            <span>Prev</span>
+            <SkipBack size={14} />
           </button>
 
           {/* Play / Pause Toggle */}
@@ -315,9 +355,9 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
             onClick={handleTogglePlay}
             disabled={isCompleted && !isPlaying}
             aria-label={isPlaying ? 'Pause solution autoplay' : 'Play solution automatically'}
-            title={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
+            title={isPlaying ? 'Pause autoplay (Space)' : 'Play autoplay (Space)'}
           >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+            {isPlaying ? <Pause size={15} /> : <Play size={15} />}
             <span>{isPlaying ? 'Pause' : 'Play'}</span>
           </button>
 
@@ -327,15 +367,15 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
             onClick={handleStepForward}
             disabled={!canStepForward}
             aria-label="Step forward to next move"
-            title="Step forward (next move)"
+            title="Step forward (Right Arrow)"
           >
-            <span>Next</span>
-            <SkipForward size={16} />
+            <SkipForward size={14} />
           </button>
         </div>
 
         {/* Speed Selector Pills */}
         <div className="solution-speed-selector" role="group" aria-label="Playback speed">
+          <span className="speed-group-label">SPEED</span>
           {SPEED_PRESETS.map((preset) => {
             const isActive = playbackSpeed === preset.ms;
             return (
@@ -350,6 +390,11 @@ export function SolutionPlayerView({ controller, compact = false, onClose }) {
               </button>
             );
           })}
+        </div>
+
+        {/* Keyboard hints footer */}
+        <div className="solution-keyboard-hints">
+          <span>Left/Right: Step • Space: Play/Pause • R: Restart</span>
         </div>
       </div>
     </div>

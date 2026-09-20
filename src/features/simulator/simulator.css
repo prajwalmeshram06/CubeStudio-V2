@@ -1,12 +1,16 @@
-/* CubeStudio V2 - Simulator UI Styles */
+/* CubeStudio V2 - Simulator UI Styles
+   Matches Stitch Visual Reference & DESIGN.md Specifications
+*/
+
+@import '../../styles/tokens.css';
 
 .simulator-container {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #0b0f19;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-primary);
+  font-family: var(--font-sans);
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -33,257 +37,366 @@
   cursor: grabbing;
 }
 
-/* Floating Header Bar */
+/* ── Floating Top Telemetry HUD (Stitch Reference) ────────────────────── */
 .simulator-header {
   position: absolute;
-  top: 16px;
-  left: 20px;
-  right: 20px;
+  top: 68px; /* Below global floating pill nav */
+  left: 0;
+  right: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
   pointer-events: none;
-  z-index: 10;
+  z-index: 20;
 }
 
-.brand-section {
-  display: flex;
+.simulator-hud-pill {
+  pointer-events: auto;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  pointer-events: auto;
+  background: rgba(13, 19, 33, 0.82);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  padding: 6px 16px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.brand-title {
-  font-size: 1.1rem;
+.hud-status-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.hud-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.hud-dot.dot-solved {
+  background-color: var(--color-success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+}
+
+.hud-dot.dot-scrambled {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+}
+
+.hud-status-text {
+  font-size: 0.8rem;
   font-weight: 700;
-  color: #f8fafc;
-  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
-.badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 9999px;
+.hud-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.badge-solved {
-  background-color: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.4);
-}
-
-.badge-scrambled {
-  background-color: rgba(234, 179, 8, 0.2);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.4);
-}
-
-.stats-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  pointer-events: auto;
-  color: #e2e8f0;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.stat-value {
-  font-size: 1rem;
+.hud-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #38bdf8;
+  color: var(--accent-light);
 }
 
-/* Floating Toolbar Bottom */
+.hud-badge-mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── Floating Bottom Control Workbench (Stitch Reference) ─────────────── */
 .simulator-toolbar {
   position: absolute;
-  bottom: 24px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  background: rgba(13, 19, 33, 0.9);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  padding: 6px 8px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   pointer-events: auto;
-  z-index: 10;
-  transition: bottom 0.2s ease;
+  z-index: 20;
+  transition: bottom var(--transition-fast);
 }
 
 .has-solution-player .simulator-toolbar {
   bottom: 12px;
-  gap: 8px;
 }
 
 .has-solution-player .simulator-toolbar .face-buttons-bar {
-  display: none; /* Hide individual face buttons to maximize cube view while keeping all undo/redo/view/reset actions */
+  display: none;
 }
-
-.has-solution-player .keyboard-hint,
-.has-solution-player .speed-control {
-  bottom: 12px;
-}
-
 
 .face-buttons-bar {
   display: flex;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 6px 10px;
-  border-radius: 14px;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-inner-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+}
+
+.btn-face {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.btn-face:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-face:active {
+  transform: translateY(0);
+}
+
+.btn-modifier {
+  width: 28px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.btn-modifier:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-modifier.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-light);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
 }
 
 .action-buttons-bar {
   display: flex;
-  gap: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 6px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+  gap: 4px;
 }
 
-.btn {
+.btn-action {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  background: rgba(30, 41, 59, 0.8);
-  color: #f1f5f9;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
+  user-select: none;
 }
 
-.btn:hover:not(:disabled) {
-  background: rgba(51, 65, 85, 0.9);
+.btn-action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
-.btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn:disabled {
-  opacity: 0.4;
+.btn-action:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-.btn-face {
-  width: 40px;
-  height: 40px;
+.btn-icon-only {
+  width: 32px;
+  height: 32px;
   padding: 0;
-  font-size: 1rem;
-  font-family: monospace;
+  justify-content: center;
 }
 
-.btn-modifier {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
+.btn-action-editor {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
 }
 
-.btn-active {
-  background: #2563eb !important;
+.btn-action-editor:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.5);
   color: #ffffff;
-  border-color: #60a5fa;
 }
 
-/* Speed Controls Overlay */
-.speed-control {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 600;
-  z-index: 10;
+.btn-action-solve {
+  background: var(--accent-primary);
+  border-color: var(--accent-light);
+  color: #ffffff;
+  padding: 6px 14px;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
 }
 
-.speed-control select {
-  background: #1e293b;
-  color: #f1f5f9;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  outline: none;
-  cursor: pointer;
+.btn-action-solve:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.6);
+  transform: translateY(-1px);
 }
 
-/* Keyboard hint tooltip */
+/* ── Keyboard Hints (Bottom Left) ─────────────────────────────────────── */
 .keyboard-hint {
   position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  font-size: 0.75rem;
+  bottom: 22px;
+  left: 20px;
+  background: rgba(13, 19, 33, 0.8);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.72rem;
   display: flex;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
   z-index: 10;
 }
 
 .kbd {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2px 5px;
   border-radius: 4px;
-  color: #e2e8f0;
-  font-family: monospace;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
-/* Docked Solution Player in 3D Simulator (dedicated non-overlapping bottom panel) */
+.kbd-sep {
+  color: var(--text-dim);
+}
+
+/* ── Speed Control Overlay (Bottom Right) ─────────────────────────────── */
+.speed-control {
+  position: absolute;
+  bottom: 22px;
+  right: 20px;
+  background: rgba(13, 19, 33, 0.8);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  z-index: 10;
+}
+
+.speed-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.speed-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.speed-control select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 3px 20px 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.speed-control select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.speed-select-arrow {
+  position: absolute;
+  right: 6px;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+/* ── Docked Solution Player in 3D Simulator ───────────────────────────── */
 .simulator-solution-player-dock {
   flex-shrink: 0;
   width: 100%;
-  max-width: 780px;
+  max-width: 820px;
   margin: 0 auto;
-  padding: 0.5rem 1rem 0.85rem 1rem;
+  padding: 0.4rem 1rem 0.8rem 1rem;
   box-sizing: border-box;
   z-index: 25;
 }

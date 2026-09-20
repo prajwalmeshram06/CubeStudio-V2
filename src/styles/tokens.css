@@ -1,0 +1,94 @@
+/* CubeStudio V2 - Design Tokens & Global CSS Variables
+   Governed by DESIGN.md & Stitch Visual Reference Specifications
+*/
+
+:root {
+  /* ── Background & Surfaces ───────────────────────────────── */
+  --bg-primary: #070a12;
+  --bg-secondary: #0b0f19;
+  --bg-tertiary: #0f172a;
+  
+  --surface-panel: rgba(15, 23, 42, 0.85);
+  --surface-panel-border: rgba(255, 255, 255, 0.08);
+  --surface-card: #111827;
+  --surface-card-hover: #172033;
+  --surface-card-border: rgba(255, 255, 255, 0.1);
+  --surface-elevated: #1e293b;
+  --surface-overlay: rgba(3, 7, 18, 0.82);
+
+  /* ── Text Colors ─────────────────────────────────────────── */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* ── Accent & Interactive ────────────────────────────────── */
+  --accent-primary: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-glow: rgba(37, 99, 235, 0.4);
+  --accent-light: #60a5fa;
+  --accent-bg: rgba(37, 99, 235, 0.15);
+  --accent-cyan: #38bdf8;
+
+  /* ── Semantic Status Colors ──────────────────────────────── */
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.15);
+  --color-success-border: rgba(16, 185, 129, 0.35);
+  --color-success-text: #4ade80;
+
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-warning-border: rgba(245, 158, 11, 0.35);
+  --color-warning-text: #fbbf24;
+
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.15);
+  --color-error-border: rgba(239, 68, 68, 0.35);
+  --color-error-text: #f87171;
+
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.15);
+  --color-info-border: rgba(59, 130, 246, 0.35);
+
+  /* ── Typography Stacks ───────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, 'Fira Code', Menlo, monospace;
+
+  /* ── Radii Scale ─────────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* ── Shadows & Blur ──────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.35);
+
+  --backdrop-blur: blur(16px);
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base resets & box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Global focus-visible styling for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}

@@ -1,13 +1,14 @@
 /**
  * CubeStudio V2 - Simulator View
  * React presentation component providing the interactive 3D Rubik's Cube simulator.
+ * Governed by DESIGN.md & Stitch Visual Specifications.
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import { CubeScene } from '../../cube/rendering/CubeScene.js';
 import { CubeRenderer } from '../../cube/rendering/CubeRenderer.js';
 import { SimulatorController } from './SimulatorController.js';
-import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass, Edit3, Wand2 } from 'lucide-react';
+import { RotateCcw, RotateCw, Shuffle, RefreshCw, Compass, Edit3, Wand2, Sparkles, ChevronDown } from 'lucide-react';
 import { SolutionPlayerController } from '../solver/SolutionPlayerController.js';
 import { SolutionPlayerView } from '../solver/SolutionPlayerView.jsx';
 import './simulator.css';
@@ -49,8 +50,6 @@ export function SimulatorView({
   const [modifier, setModifier] = useState(''); // '' (CW), "'" (prime), '2' (double)
 
   // Keep a ref that always reflects whether a solution player is currently mounted.
-  // The keyboard handler closure reads from this ref so it never needs to be
-  // re-registered when solutionPlayer state changes.
   const solutionPlayerRef = useRef(null);
   useEffect(() => {
     solutionPlayerRef.current = solutionPlayer;
@@ -132,7 +131,6 @@ export function SimulatorView({
       }
 
       // When Solution Player is active it owns Space (play/pause) and Escape (close).
-      // Yield those keys to SolutionPlayerView's handler.
       if (solutionPlayerRef.current) {
         if (e.code === 'Space' || e.key === 'Escape') return;
       }
@@ -200,30 +198,34 @@ export function SimulatorView({
       <div className="simulator-viewport-wrapper">
         <div ref={containerRef} className="viewport-container" />
 
-        {/* Floating Header Bar */}
+        {/* Floating Top Telemetry HUD (Stitch Reference) */}
         <div className="simulator-header">
-          <div className="brand-section">
-            <span className="brand-title">{variant === 'training' ? 'Training' : 'CubeStudio V2'}</span>
-            <span className={`badge ${simState.isSolved ? 'badge-solved' : 'badge-scrambled'}`}>
-              {simState.isSolved ? 'Solved' : 'Scrambled'}
-            </span>
-          </div>
-
-          <div className="stats-bar">
-            <div className="stat-item">
-              <span className="stat-label">Moves</span>
-              <span className="stat-value">{simState.moveCount}</span>
+          <div className="simulator-hud-pill">
+            <div className="hud-status-item">
+              <span className={`hud-dot ${simState.isSolved ? 'dot-solved' : 'dot-scrambled'}`} />
+              <span className="hud-status-text">{simState.isSolved ? 'Solved State' : 'Scrambled'}</span>
             </div>
+
+            <div className="hud-divider" />
+
+            <div className="hud-item">
+              <span className="hud-label">MOVES</span>
+              <span className="hud-value">{simState.moveCount}</span>
+            </div>
+
             {simState.lastMove && (
-              <div className="stat-item">
-                <span className="stat-label">Last</span>
-                <span className="stat-value">{simState.lastMove}</span>
-              </div>
+              <>
+                <div className="hud-divider" />
+                <div className="hud-item">
+                  <span className="hud-label">LAST MOVE</span>
+                  <span className="hud-badge-mono">{simState.lastMove}</span>
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Keyboard Shortcuts Hint */}
+        {/* Keyboard Shortcuts Hint (Bottom Left) */}
         <div className="keyboard-hint">
           {variant === 'training' ? (
             <>
@@ -231,124 +233,137 @@ export function SimulatorView({
             </>
           ) : (
             <>
-              <span className="kbd">U D L R F B</span> turns <span className="kbd">Shift</span> prime <span className="kbd">Space</span> scramble
+              <span className="kbd">Space</span> Scramble <span className="kbd-sep">•</span> <span className="kbd">Esc</span> Reset
             </>
           )}
         </div>
 
-        {/* Speed Control Overlay */}
+        {/* Speed Control Overlay (Bottom Right) */}
         <div className="speed-control">
-          <span>Speed:</span>
-          <select value={simState.animationSpeed} onChange={handleSpeedChange}>
-            <option value={0}>Instant (0ms)</option>
-            <option value={100}>Fast (100ms)</option>
-            <option value={200}>Normal (200ms)</option>
-            <option value={350}>Smooth (350ms)</option>
-          </select>
+          <span className="speed-label">SPEED:</span>
+          <div className="speed-select-wrapper">
+            <select
+              value={simState.animationSpeed}
+              onChange={handleSpeedChange}
+              aria-label="Animation speed"
+            >
+              <option value={0}>Instant (0ms)</option>
+              <option value={100}>Fast (100ms)</option>
+              <option value={200}>Normal (200ms)</option>
+              <option value={350}>Smooth (350ms)</option>
+            </select>
+            <ChevronDown size={12} className="speed-select-arrow" />
+          </div>
         </div>
 
-        {/* Floating Interactive Toolbar — ALWAYS rendered and accessible */}
+        {/* Floating Bottom Control Workbench (Stitch Reference) */}
         <div className="simulator-toolbar">
-          {/* Face Buttons */}
+          {/* Face Buttons & Modifiers */}
           <div className="face-buttons-bar">
             <button
-              className={`btn btn-modifier ${modifier === "'" ? 'btn-active' : ''}`}
+              className={`btn-modifier ${modifier === "'" ? 'active' : ''}`}
               onClick={() => setModifier(modifier === "'" ? '' : "'")}
-              title="Prime turn (counter-clockwise)"
+              title="Prime modifier: counter-clockwise (Shift + Face)"
+              aria-label="Prime modifier"
             >
               '
             </button>
             <button
-              className={`btn btn-modifier ${modifier === '2' ? 'btn-active' : ''}`}
+              className={`btn-modifier ${modifier === '2' ? 'active' : ''}`}
               onClick={() => setModifier(modifier === '2' ? '' : '2')}
-              title="Double turn (180 degrees)"
+              title="Double modifier: 180 degrees (Alt + Face)"
+              aria-label="Double turn modifier"
             >
               2
             </button>
+
+            <div className="toolbar-inner-divider" />
+
             {['U', 'D', 'L', 'R', 'F', 'B'].map((face) => (
               <button
                 key={face}
-                className="btn btn-face"
+                className="btn-face"
                 onClick={() => handleFaceClick(face)}
                 title={`Turn face ${face}${modifier}`}
+                aria-label={`Turn face ${face}${modifier}`}
               >
                 {face}
               </button>
             ))}
           </div>
 
-          {/* Action Controls */}
+          {/* Action Controls Bar */}
           <div className="action-buttons-bar">
             {variant !== 'training' && (
               <button
-                className="btn"
+                className="btn-action"
                 onClick={() => controllerRef.current?.scramble(20)}
                 title="Generate random WCA scramble (Space)"
               >
-                <Shuffle size={16} />
+                <Shuffle size={14} />
                 <span>Scramble</span>
               </button>
             )}
 
             <button
-              className="btn"
+              className="btn-action btn-icon-only"
               disabled={!simState.canUndo}
               onClick={() => controllerRef.current?.undo()}
               title="Undo move (Cmd+Z)"
+              aria-label="Undo move"
             >
-              <RotateCcw size={16} />
-              <span>Undo</span>
+              <RotateCcw size={14} />
             </button>
 
             <button
-              className="btn"
+              className="btn-action btn-icon-only"
               disabled={!simState.canRedo}
               onClick={() => controllerRef.current?.redo()}
               title="Redo move (Cmd+Y)"
+              aria-label="Redo move"
             >
-              <RotateCw size={16} />
-              <span>Redo</span>
+              <RotateCw size={14} />
+            </button>
+
+            <button
+              className="btn-action btn-icon-only"
+              onClick={() => sceneRef.current?.resetCamera()}
+              title="Reset camera view"
+              aria-label="Reset camera view"
+            >
+              <Compass size={14} />
             </button>
 
             {variant !== 'training' && (
               <button
-                className="btn"
+                className="btn-action btn-icon-only"
                 onClick={() => controllerRef.current?.reset()}
                 title="Reset to solved state (Escape)"
+                aria-label="Reset to solved state"
               >
-                <RefreshCw size={16} />
-                <span>Reset</span>
+                <RefreshCw size={14} />
               </button>
             )}
 
-            <button
-              className="btn"
-              onClick={() => sceneRef.current?.resetCamera()}
-              title="Reset camera view"
-            >
-              <Compass size={16} />
-              <span>View</span>
-            </button>
-
             {variant !== 'training' && onOpenEditor && (
               <button
-                className="btn"
+                className="btn-action btn-action-editor"
                 onClick={() => onOpenEditor(controllerRef.current?.cubeState.clone())}
                 title="Open current state in 2D Manual Editor"
               >
-                <Edit3 size={16} />
-                <span>Editor</span>
+                <Edit3 size={14} />
+                <span>Open in Editor</span>
               </button>
             )}
 
             {variant !== 'training' && onOpenSolver && (
               <button
-                className="btn"
+                className="btn-action btn-action-solve"
                 onClick={() => onOpenSolver(controllerRef.current?.cubeState.clone())}
                 title="Open current state in Kociemba Solver"
               >
-                <Wand2 size={16} />
-                <span>Solve</span>
+                <Wand2 size={14} />
+                <span>Solve Cube</span>
               </button>
             )}
           </div>
@@ -372,3 +387,4 @@ export function SimulatorView({
   );
 }
 
+export default SimulatorView;
